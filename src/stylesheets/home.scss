@@ -1,0 +1,5 @@
+@import './mixins.scss';
+
+.start-button {
+  @include button($primary-color);
+}
