@@ -15,12 +15,12 @@ const Karakaku: React.FC = () => {
 
     useEffect(() => {
         const loadLyrics = async () => {
-        try {
-            const lrcContent = await loadLRCFile(`/songs/${songName}/lyrics.lrc`);
-            setLyrics(parseLRC(lrcContent));
-        } catch (error) {
-            console.error('Failed to load LRC file:', error);
-        }
+            try {
+                const lrcContent = await loadLRCFile(`/songs/${songName}/lyrics.lrc`);
+                setLyrics(parseLRC(lrcContent));
+            } catch (error) {
+                console.error('Failed to load LRC file:', error);
+            }
         };
 
         loadLyrics();
@@ -29,97 +29,107 @@ const Karakaku: React.FC = () => {
     const handleTimeUpdate = () => {
         const audioEl = audioPlayerRef.current?.audioEl.current;
         if (audioEl) {
-        const currentTime = audioEl.currentTime;
-        const nextLyricTime = lyrics[currentLyricIndex + 1]?.time;
+            const currentTime = audioEl.currentTime;
+            const nextLyricTime = lyrics[currentLyricIndex + 1]?.time;
 
-        if (nextLyricTime && currentTime >= nextLyricTime - 0.05) {
-            if (!isValidated) {
-                audioEl.pause();
-            } else {
-                setUserInput('');
-                setCurrentLyricIndex(currentLyricIndex + 1);
-                setIsValidated(false);
+            if (nextLyricTime && currentTime >= nextLyricTime - 0.05) {
+                if (!isValidated) {
+                    audioEl.pause();
+                } else {
+                    setUserInput('');
+                    setCurrentLyricIndex(currentLyricIndex + 1);
+                    setIsValidated(false);
+                }
             }
-        }
         }
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const inputValue = e.target.value;
-        setUserInput(inputValue);
+        let inputValue = e.target.value;
 
-        if (lyrics[currentLyricIndex] && inputValue.trim().toLowerCase() === lyrics[currentLyricIndex].text.trim().toLowerCase()) {
-        setIsValidated(true);
-        if (audioPlayerRef.current?.audioEl.current && audioPlayerRef.current.audioEl.current.paused) {
-            audioPlayerRef.current.audioEl.current.play();
+        if (!lyrics[currentLyricIndex]) return;
+
+        const currentLyric = lyrics[currentLyricIndex].text;
+        const nextExpectedChar = currentLyric[userInput.length + 1];
+
+        if (nextExpectedChar === ' ' && inputValue[userInput.length] !== ' ') {
+            inputValue += ' ';
         }
+
+        setUserInput(inputValue);
+        console.log(currentLyric[userInput.length + 1])
+
+        if (inputValue.trim().toLowerCase() === currentLyric.trim().toLowerCase()) {
+            setIsValidated(true);
+            if (audioPlayerRef.current?.audioEl.current && audioPlayerRef.current.audioEl.current.paused) {
+                audioPlayerRef.current.audioEl.current.play();
+            }
         }
     };
 
     const getStyledText = () => {
         const currentLyric = lyrics[currentLyricIndex]?.text || '';
         return currentLyric.split('').map((char, index) => {
-        let className = '';
-        if (index < userInput.length) {
-            className = userInput[index].toLowerCase() === char.toLowerCase() ? 'right' : 'wrong';
-        }
-        return (
-            <span key={index} className={className}>
-            {char}
-            </span>
-        );
+            let className = '';
+            if (index < userInput.length) {
+                className = userInput[index].toLowerCase() === char.toLowerCase() ? 'right' : 'wrong';
+            }
+            return (
+                <span key={index} className={className}>
+                    {char}
+                </span>
+            );
         });
     };
-  
 
     const renderLyrics = () => {
         return lyrics.map((lyric, index) => (
-        <div key={index} className={`lyric-line ${index === currentLyricIndex ? 'current' : ''}`}>
-            {index === currentLyricIndex - 1 && <p className="previous">{lyrics[index].text}</p>}
-            {index === currentLyricIndex && (
-            <div className="current-lyric-container">
-                <p className="current-lyric">{getStyledText()}</p>
-                <input
-                    type="text"
-                    value={userInput}
-                    onChange={handleInputChange}
-                    className="text-input"
-                    autoFocus
-                    spellCheck={false}
-                />
+            <div key={index} className={`lyric-line ${index === currentLyricIndex ? 'current' : ''}`}>
+                {index === currentLyricIndex - 1 && <p className="previous">{lyrics[index].text}</p>}
+                {index === currentLyricIndex && (
+                    <div className="current-lyric-container">
+                        <p className="current-lyric">{getStyledText()}</p>
+                        <input
+                            type="text"
+                            value={userInput}
+                            onChange={handleInputChange}
+                            className="text-input"
+                            autoFocus
+                            spellCheck={false}
+                        />
+                    </div>
+                )}
+                {index === currentLyricIndex + 1 && <p className="next">{lyrics[index].text}</p>}
             </div>
-            )}
-            {index === currentLyricIndex + 1 && <p className="next">{lyrics[index].text}</p>}
-        </div>
         ));
     };
 
     const handlePlayPauseClick = () => {
         const audioEl = audioPlayerRef.current?.audioEl.current;
         if (audioEl) {
-        if (audioEl.paused) {
-            audioEl.play();
-        } else {
-            audioEl.pause();
-        }
+            if (audioEl.paused) {
+                audioEl.play();
+            } else {
+                audioEl.pause();
+            }
         }
     };
 
     return (
         <div className="karakaku">
-        <ReactAudioPlayer
-            src={`/songs/${songName}/song.mp3`}
-            controls
-            onListen={handleTimeUpdate}
-            ref={audioPlayerRef}
-            listenInterval={100}
-        />
-        <button onClick={handlePlayPauseClick} className="game-start">
-            {audioPlayerRef.current?.audioEl.current?.paused ? 'Play' : 'Pause'}
-        </button>
-        <div className="lyrics">
-            {renderLyrics()}
-        </div>
+            <ReactAudioPlayer
+                src={`/songs/${songName}/song.mp3`}
+                controls
+                onListen={handleTimeUpdate}
+                ref={audioPlayerRef}
+                listenInterval={100}
+            />
+            <button onClick={handlePlayPauseClick} className="game-start">
+                {audioPlayerRef.current?.audioEl.current?.paused ? 'Play' : 'Pause'}
+            </button>
+            <div className="lyrics">
+                {renderLyrics()}
+            </div>
         </div>
     );
 };
