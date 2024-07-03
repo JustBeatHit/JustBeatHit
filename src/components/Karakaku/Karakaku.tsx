@@ -48,10 +48,7 @@ const Karakaku: React.FC = () => {
         const inputValue = e.target.value;
         setUserInput(inputValue);
 
-        if (
-        lyrics[currentLyricIndex] &&
-        inputValue.trim() === lyrics[currentLyricIndex].text.trim()
-        ) {
+        if (lyrics[currentLyricIndex] && inputValue.trim().toLowerCase() === lyrics[currentLyricIndex].text.trim().toLowerCase()) {
         setIsValidated(true);
         if (audioPlayerRef.current?.audioEl.current && audioPlayerRef.current.audioEl.current.paused) {
             audioPlayerRef.current.audioEl.current.play();
@@ -64,7 +61,7 @@ const Karakaku: React.FC = () => {
         return currentLyric.split('').map((char, index) => {
         let className = '';
         if (index < userInput.length) {
-            className = userInput[index] === char ? 'right' : 'wrong';
+            className = userInput[index].toLowerCase() === char.toLowerCase() ? 'right' : 'wrong';
         }
         return (
             <span key={index} className={className}>
