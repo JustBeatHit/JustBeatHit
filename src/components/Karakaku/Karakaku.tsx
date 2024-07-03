@@ -50,14 +50,15 @@ const Karakaku: React.FC = () => {
         if (!lyrics[currentLyricIndex]) return;
 
         const currentLyric = lyrics[currentLyricIndex].text;
-        const nextExpectedChar = currentLyric[userInput.length + 1];
+        const autoCompleteChars = [' ', '.', ',', '!', '?', ';', ':', '-', '(', ')', '"', "'"];
+        let nextExpectedChar = currentLyric[userInput.length + 1];
 
-        if (nextExpectedChar === ' ' && inputValue[userInput.length] !== ' ') {
-            inputValue += ' ';
+        while (autoCompleteChars.includes(nextExpectedChar) && inputValue[userInput.length] !== nextExpectedChar) {
+            inputValue += nextExpectedChar;
+            nextExpectedChar = currentLyric[inputValue.length];
         }
 
         setUserInput(inputValue);
-        console.log(currentLyric[userInput.length + 1])
 
         if (inputValue.trim().toLowerCase() === currentLyric.trim().toLowerCase()) {
             setIsValidated(true);
