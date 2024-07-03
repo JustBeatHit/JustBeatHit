@@ -11,6 +11,7 @@ const Karakaku: React.FC = () => {
     const [currentLyricIndex, setCurrentLyricIndex] = useState<number>(0);
     const [userInput, setUserInput] = useState<string>('');
     const [isValidated, setIsValidated] = useState<boolean>(false);
+    const [lockedChars, setLockedChars] = useState<string>('');
     const audioPlayerRef = useRef<ReactAudioPlayer>(null);
 
     useEffect(() => {
@@ -37,6 +38,7 @@ const Karakaku: React.FC = () => {
                     audioEl.pause();
                 } else {
                     setUserInput('');
+                    setLockedChars('');
                     setCurrentLyricIndex(currentLyricIndex + 1);
                     setIsValidated(false);
                 }
@@ -55,13 +57,26 @@ const Karakaku: React.FC = () => {
 
         // Check if the user deleted a character
         if (inputValue.length < userInput.length) {
-            setUserInput(inputValue);
-            return;
+            // Prevent deletion of locked characters
+            if (inputValue.length < lockedChars.length) {
+                setUserInput(lockedChars);
+                return;
+            } else {
+                setUserInput(inputValue);
+                return;
+            }
         }
 
         // Autocomplete characters if the next character is a special character
         while (autoCompleteChars.includes(currentLyric[userInputUpdated.length])) {
             userInputUpdated += currentLyric[userInputUpdated.length];
+        }
+
+        // Lock the correctly typed characters
+        const correctPortion = currentLyric.slice(0, userInputUpdated.length);
+        const userTypedPortion = userInputUpdated.slice(0, correctPortion.length);
+        if (userTypedPortion.toLowerCase() === correctPortion.toLowerCase()) {
+            setLockedChars(userInputUpdated);
         }
 
         setUserInput(userInputUpdated);
