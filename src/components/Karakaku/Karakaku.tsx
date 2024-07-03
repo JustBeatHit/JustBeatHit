@@ -12,6 +12,7 @@ const Karakaku: React.FC = () => {
     const [userInput, setUserInput] = useState<string>('');
     const [isValidated, setIsValidated] = useState<boolean>(false);
     const [lockedChars, setLockedChars] = useState<string>('');
+    const [isStarted, setIsStarted] = useState<boolean>(false);
     const audioPlayerRef = useRef<ReactAudioPlayer>(null);
 
     useEffect(() => {
@@ -83,9 +84,11 @@ const Karakaku: React.FC = () => {
 
         if (userInputUpdated.trim().toLowerCase() === currentLyric.trim().toLowerCase()) {
             setIsValidated(true);
-            if (audioPlayerRef.current?.audioEl.current && audioPlayerRef.current.audioEl.current.paused) {
-                audioPlayerRef.current.audioEl.current.play();
-            }
+        }
+
+        if (!isStarted && audioPlayerRef.current?.audioEl.current?.paused) {
+            audioPlayerRef.current.audioEl.current.play();
+            setIsStarted(true);
         }
     };
 
@@ -131,6 +134,7 @@ const Karakaku: React.FC = () => {
         if (audioEl) {
             if (audioEl.paused) {
                 audioEl.play();
+                setIsStarted(true);
             } else {
                 audioEl.pause();
             }
