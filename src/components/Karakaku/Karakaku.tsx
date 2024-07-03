@@ -45,22 +45,28 @@ const Karakaku: React.FC = () => {
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let inputValue = e.target.value;
+        const inputValue = e.target.value;
 
         if (!lyrics[currentLyricIndex]) return;
 
         const currentLyric = lyrics[currentLyricIndex].text;
         const autoCompleteChars = [' ', '.', ',', '!', '?', ';', ':', '-', '(', ')', '"', "'"];
-        let nextExpectedChar = currentLyric[userInput.length + 1];
+        let userInputUpdated = inputValue;
 
-        while (autoCompleteChars.includes(nextExpectedChar) && inputValue[userInput.length] !== nextExpectedChar) {
-            inputValue += nextExpectedChar;
-            nextExpectedChar = currentLyric[inputValue.length];
+        // Check if the user deleted a character
+        if (inputValue.length < userInput.length) {
+            setUserInput(inputValue);
+            return;
         }
 
-        setUserInput(inputValue);
+        // Autocomplete characters if the next character is a special character
+        while (autoCompleteChars.includes(currentLyric[userInputUpdated.length])) {
+            userInputUpdated += currentLyric[userInputUpdated.length];
+        }
 
-        if (inputValue.trim().toLowerCase() === currentLyric.trim().toLowerCase()) {
+        setUserInput(userInputUpdated);
+
+        if (userInputUpdated.trim().toLowerCase() === currentLyric.trim().toLowerCase()) {
             setIsValidated(true);
             if (audioPlayerRef.current?.audioEl.current && audioPlayerRef.current.audioEl.current.paused) {
                 audioPlayerRef.current.audioEl.current.play();
