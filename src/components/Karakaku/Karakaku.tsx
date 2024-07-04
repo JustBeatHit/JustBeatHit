@@ -84,6 +84,10 @@ const Karakaku: React.FC = () => {
 
         if (userInputUpdated.trim().toLowerCase() === currentLyric.trim().toLowerCase()) {
             setIsValidated(true);
+            // Restart audio if paused
+            if (audioPlayerRef.current?.audioEl.current && audioPlayerRef.current.audioEl.current.paused) {
+                audioPlayerRef.current.audioEl.current.play();
+            }
         }
 
         if (!isStarted && audioPlayerRef.current?.audioEl.current?.paused) {
