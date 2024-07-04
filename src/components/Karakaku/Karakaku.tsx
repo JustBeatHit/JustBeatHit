@@ -5,6 +5,11 @@ import { parseLRC, LyricLine } from '../../utils/LrcParser';
 import { loadLRCFile } from '../../utils/LrcLoader';
 import '../../stylesheets/karakaku.scss';
 
+// Fonction pour normaliser les chaînes et supprimer les accents
+const normalizeString = (str: string): string => {
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+};
+
 const Karakaku: React.FC = () => {
     const { songName } = useParams<{ songName: string }>();
     const [lyrics, setLyrics] = useState<LyricLine[]>([]);
@@ -76,13 +81,13 @@ const Karakaku: React.FC = () => {
         // Lock the correctly typed characters
         const correctPortion = currentLyric.slice(0, userInputUpdated.length);
         const userTypedPortion = userInputUpdated.slice(0, correctPortion.length);
-        if (userTypedPortion.toLowerCase() === correctPortion.toLowerCase()) {
+        if (normalizeString(userTypedPortion.toLowerCase()) === normalizeString(correctPortion.toLowerCase())) {
             setLockedChars(userInputUpdated);
         }
 
         setUserInput(userInputUpdated);
 
-        if (userInputUpdated.trim().toLowerCase() === currentLyric.trim().toLowerCase()) {
+        if (normalizeString(userInputUpdated.trim().toLowerCase()) === normalizeString(currentLyric.trim().toLowerCase())) {
             setIsValidated(true);
             // Restart audio if paused
             if (audioPlayerRef.current?.audioEl.current && audioPlayerRef.current.audioEl.current.paused) {
@@ -101,7 +106,7 @@ const Karakaku: React.FC = () => {
         return currentLyric.split('').map((char, index) => {
             let className = '';
             if (index < userInput.length) {
-                className = userInput[index].toLowerCase() === char.toLowerCase() ? 'right' : 'wrong';
+                className = normalizeString(userInput[index].toLowerCase()) === normalizeString(char.toLowerCase()) ? 'right' : 'wrong';
             }
             return (
                 <span key={index} className={className}>
