@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import ReactAudioPlayer from 'react-audio-player';
 import { parseLRC, LyricLine } from '../../utils/LrcParser';
 import { loadLRCFile } from '../../utils/LrcLoader';
 import '../../stylesheets/karakaku.scss';
 
-// Fonction pour normaliser les chaînes et supprimer les accents
+// Normalise les chaînes et supprime les accents
 const normalizeString = (str: string): string => {
-    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 };
 
 const Karakaku: React.FC = () => {
@@ -19,9 +19,8 @@ const Karakaku: React.FC = () => {
     const [lockedChars, setLockedChars] = useState<string>('');
     const [isStarted, setIsStarted] = useState<boolean>(false);
     const audioPlayerRef = useRef<ReactAudioPlayer>(null);
-    const cursorRef = useRef<HTMLDivElement>(null);
-    const currentLyricRef = useRef<HTMLParagraphElement>(null);
-    const charRefs = useRef<(HTMLSpanElement | null)[]>([]);
+    const charRefs = useRef<(HTMLSpanElement | null)[][]>([]);
+    const caretRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const loadLyrics = async () => {
@@ -37,7 +36,23 @@ const Karakaku: React.FC = () => {
     }, [songName]);
 
     useEffect(() => {
-        positionCursor();
+        // Initialise les références aux caractères lorsque les paroles changent
+        charRefs.current = lyrics.map(() => []);
+    }, [lyrics]);
+
+    useEffect(() => {
+        // Mettre à jour la position du caret
+        const currentCharIndex = userInput.length;
+        const charRef = charRefs.current[currentLyricIndex]?.[currentCharIndex];
+
+        if (charRef && caretRef.current) {
+            const rect = charRef.getBoundingClientRect();
+            const parentRect = charRef.parentElement?.getBoundingClientRect();
+            if (rect && parentRect) {
+                caretRef.current.style.left = `${rect.left - parentRect.left}px`;
+                caretRef.current.style.top = `${rect.top - parentRect.top + 5}px`;
+            }
+        }
     }, [userInput, currentLyricIndex]);
 
     const handleTimeUpdate = () => {
@@ -68,9 +83,9 @@ const Karakaku: React.FC = () => {
         const autoCompleteChars = [' ', '.', ',', '!', '?', ';', ':', '-', '(', ')', '"', "'"];
         let userInputUpdated = inputValue;
 
-        // Check if the user deleted a character
+        // Vérifie si l'utilisateur a supprimé un caractère
         if (inputValue.length < userInput.length) {
-            // Prevent deletion of locked characters
+            // Empêche la suppression des caractères verrouillés
             if (inputValue.length < lockedChars.length) {
                 setUserInput(lockedChars);
                 return;
@@ -80,23 +95,23 @@ const Karakaku: React.FC = () => {
             }
         }
 
-        // Autocomplete characters if the next character is a special character
+        // Autocompléte les caractères si le prochain caractère est spécial
         while (autoCompleteChars.includes(currentLyric[userInputUpdated.length])) {
             userInputUpdated += currentLyric[userInputUpdated.length];
         }
 
-        // Lock the correctly typed characters
+        // Verrouille les caractères correctement tapés
         const correctPortion = currentLyric.slice(0, userInputUpdated.length);
         const userTypedPortion = userInputUpdated.slice(0, correctPortion.length);
-        if (normalizeString(userTypedPortion.toLowerCase()) === normalizeString(correctPortion.toLowerCase())) {
+        if (normalizeString(userTypedPortion) === normalizeString(correctPortion)) {
             setLockedChars(userInputUpdated);
         }
 
         setUserInput(userInputUpdated);
 
-        if (normalizeString(userInputUpdated.trim().toLowerCase()) === normalizeString(currentLyric.trim().toLowerCase())) {
+        if (normalizeString(userInputUpdated.trim()) === normalizeString(currentLyric.trim())) {
             setIsValidated(true);
-            // Restart audio if paused
+            // Redémarre l'audio si en pause
             if (audioPlayerRef.current?.audioEl.current && audioPlayerRef.current.audioEl.current.paused) {
                 audioPlayerRef.current.audioEl.current.play();
             }
@@ -108,42 +123,24 @@ const Karakaku: React.FC = () => {
         }
     };
 
-    const positionCursor = () => {
-        const cursor = cursorRef.current;
-        const currentLyric = currentLyricRef.current;
-        if (cursor && currentLyric) {
-            const currentCharRef = charRefs.current[userInput.length];
-            if (currentCharRef) {
-                const charRect = currentCharRef.getBoundingClientRect();
-                const parentRect = currentLyric.getBoundingClientRect();
-                cursor.style.left = `${charRect.left - parentRect.left}px`;
-                cursor.style.top = `${charRect.top - parentRect.top}px`;
-                cursor.style.height = `${charRect.height}px`; // Ajustez la hauteur pour correspondre à la hauteur du texte
-            }
-        }
-    };
-
-    const getStyledText = useCallback(() => {
+    const getStyledText = () => {
         const currentLyric = lyrics[currentLyricIndex]?.text || '';
-        console.log('currentLyric', currentLyric);
-        charRefs.current = [];
         return currentLyric.split('').map((char, index) => {
             let className = '';
             if (index < userInput.length) {
-                className = normalizeString(userInput[index].toLowerCase()) === normalizeString(char.toLowerCase()) ? 'right' : 'wrong';
+                className = normalizeString(userInput[index]) === normalizeString(char) ? 'right' : 'wrong';
             }
-            const isNextChar = index === userInput.length;
+
+            if (!charRefs.current[currentLyricIndex]) {
+                charRefs.current[currentLyricIndex] = [];
+            }
             return (
-                <span
-                    key={index}
-                    ref={el => charRefs.current[index] = el}
-                    className={className + (isNextChar ? ' next-char' : '')}
-                >
+                <span key={index} className={className} ref={el => charRefs.current[currentLyricIndex][index] = el}>
                     {char}
                 </span>
             );
         });
-    }, [currentLyricIndex, userInput.length]);
+    };
 
     const renderLyrics = () => {
         return lyrics.map((lyric, index) => (
@@ -151,10 +148,7 @@ const Karakaku: React.FC = () => {
                 {index === currentLyricIndex - 1 && <p className="previous">{lyrics[index].text}</p>}
                 {index === currentLyricIndex && (
                     <div className="current-lyric-container">
-                        <p className="current-lyric" ref={currentLyricRef}>
-                            {getStyledText()}
-                        </p>
-                        <div className="custom-cursor" ref={cursorRef} />
+                        <p className="current-lyric">{getStyledText()}</p>
                         <input
                             type="text"
                             value={userInput}
@@ -163,6 +157,7 @@ const Karakaku: React.FC = () => {
                             autoFocus
                             spellCheck={false}
                         />
+                        <div ref={caretRef} className="caret"></div>
                     </div>
                 )}
                 {index === currentLyricIndex + 1 && <p className="next">{lyrics[index].text}</p>}

@@ -106,26 +106,15 @@
     color: #888;
 }
 
-#caret {
-    display: inline-block;
-    width: 3px;
-    background-color: $primary-color;
-    animation: blink 1s step-end infinite;
-}
-
-/* Ajoutez ceci à votre fichier CSS/scss */
-
-/* Curseur personnalisé */
-.custom-cursor {
+.caret {
     position: absolute;
-    width: 2px; /* Ajustez cette valeur pour la largeur du curseur */
-    background-color: $primary-color; /* Couleur de la barre oblique */
+    width: 2px;
+    height: 2rem;
+    background-color: $primary-color;
     animation: blink 1s ease-in-out infinite;
-    pointer-events: none; /* Empêcher le curseur d'interférer avec l'input */
     transition: all 0.1s ease-in-out;
 }
 
-/* Animation pour faire clignoter la barre oblique */
 @keyframes blink {
     from, to {
         opacity: 1;
@@ -134,9 +123,3 @@
         opacity: 0;
     }
 }
-
-/* Cacher le curseur d'insertion de texte par défaut */
-.text-input {
-    caret-color: transparent;
-}
-
