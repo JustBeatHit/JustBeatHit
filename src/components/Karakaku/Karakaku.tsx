@@ -10,6 +10,11 @@ const normalizeString = (str: string): string => {
     return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 };
 
+// Enlève les segments entre parenthèses dans les lignes de paroles
+const removeParentheses = (str: string): string => {
+    return str.replace(/\(.*?\)/g, '').trim();
+};
+
 const Karakaku: React.FC = () => {
     const { songName } = useParams<{ songName: string }>();
     const [lyrics, setLyrics] = useState<LyricLine[]>([]);
@@ -26,7 +31,12 @@ const Karakaku: React.FC = () => {
         const loadLyrics = async () => {
             try {
                 const lrcContent = await loadLRCFile(`/songs/${songName}/lyrics.lrc`);
-                setLyrics(parseLRC(lrcContent));
+                const parsedLyrics = parseLRC(lrcContent);
+                const cleanedLyrics = parsedLyrics.map(lyric => ({
+                    ...lyric,
+                    text: removeParentheses(lyric.text)
+                }));
+                setLyrics(cleanedLyrics);
             } catch (error) {
                 console.error('Failed to load LRC file:', error);
             }
