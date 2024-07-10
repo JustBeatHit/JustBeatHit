@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import ReactAudioPlayer from 'react-audio-player';
 import { parseLRC, LyricLine } from '../../utils/LrcParser';
@@ -19,6 +19,9 @@ const Karakaku: React.FC = () => {
     const [lockedChars, setLockedChars] = useState<string>('');
     const [isStarted, setIsStarted] = useState<boolean>(false);
     const audioPlayerRef = useRef<ReactAudioPlayer>(null);
+    const cursorRef = useRef<HTMLDivElement>(null);
+    const currentLyricRef = useRef<HTMLParagraphElement>(null);
+    const charRefs = useRef<(HTMLSpanElement | null)[]>([]);
 
     useEffect(() => {
         const loadLyrics = async () => {
@@ -32,6 +35,10 @@ const Karakaku: React.FC = () => {
 
         loadLyrics();
     }, [songName]);
+
+    useEffect(() => {
+        positionCursor();
+    }, [userInput, currentLyricIndex]);
 
     const handleTimeUpdate = () => {
         const audioEl = audioPlayerRef.current?.audioEl.current;
@@ -101,20 +108,42 @@ const Karakaku: React.FC = () => {
         }
     };
 
-    const getStyledText = () => {
+    const positionCursor = () => {
+        const cursor = cursorRef.current;
+        const currentLyric = currentLyricRef.current;
+        if (cursor && currentLyric) {
+            const currentCharRef = charRefs.current[userInput.length];
+            if (currentCharRef) {
+                const charRect = currentCharRef.getBoundingClientRect();
+                const parentRect = currentLyric.getBoundingClientRect();
+                cursor.style.left = `${charRect.left - parentRect.left}px`;
+                cursor.style.top = `${charRect.top - parentRect.top}px`;
+                cursor.style.height = `${charRect.height}px`; // Ajustez la hauteur pour correspondre à la hauteur du texte
+            }
+        }
+    };
+
+    const getStyledText = useCallback(() => {
         const currentLyric = lyrics[currentLyricIndex]?.text || '';
+        console.log('currentLyric', currentLyric);
+        charRefs.current = [];
         return currentLyric.split('').map((char, index) => {
             let className = '';
             if (index < userInput.length) {
                 className = normalizeString(userInput[index].toLowerCase()) === normalizeString(char.toLowerCase()) ? 'right' : 'wrong';
             }
+            const isNextChar = index === userInput.length;
             return (
-                <span key={index} className={className}>
+                <span
+                    key={index}
+                    ref={el => charRefs.current[index] = el}
+                    className={className + (isNextChar ? ' next-char' : '')}
+                >
                     {char}
                 </span>
             );
         });
-    };
+    }, [currentLyricIndex, userInput.length]);
 
     const renderLyrics = () => {
         return lyrics.map((lyric, index) => (
@@ -122,7 +151,10 @@ const Karakaku: React.FC = () => {
                 {index === currentLyricIndex - 1 && <p className="previous">{lyrics[index].text}</p>}
                 {index === currentLyricIndex && (
                     <div className="current-lyric-container">
-                        <p className="current-lyric">{getStyledText()}</p>
+                        <p className="current-lyric" ref={currentLyricRef}>
+                            {getStyledText()}
+                        </p>
+                        <div className="custom-cursor" ref={cursorRef} />
                         <input
                             type="text"
                             value={userInput}
