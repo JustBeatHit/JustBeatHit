@@ -137,8 +137,12 @@ const Karakaku: React.FC = () => {
 
         if (normalizeString(userInputUpdated.trim()) === normalizeString(currentLyric.trim())) {
             setIsValidated(true);
-            // Redémarre l'audio si en pause
-            if (audioPlayerRef.current?.audioEl.current && audioPlayerRef.current.audioEl.current.paused) {
+
+            // Si c'est la dernière ligne, on ne redémarre pas l'audio
+            if (currentLyricIndex === lyrics.length - 1) {
+                audioPlayerRef.current?.audioEl.current?.pause();
+                setIsStarted(false);
+            } else if (audioPlayerRef.current?.audioEl.current && audioPlayerRef.current.audioEl.current.paused) {
                 audioPlayerRef.current.audioEl.current.play();
             }
         }
