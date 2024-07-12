@@ -153,6 +153,10 @@ const Karakaku: React.FC = () => {
         }
     };
 
+    const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+        e.preventDefault();
+    };
+
     const getStyledText = () => {
         const currentLyric = lyrics[currentLyricIndex]?.text || '';
         return currentLyric.split('').map((char, index) => {
@@ -183,6 +187,7 @@ const Karakaku: React.FC = () => {
                             type="text"
                             value={userInput}
                             onChange={handleInputChange}
+                            onPaste={handlePaste}
                             className="text-input"
                             autoFocus
                             spellCheck={false}
