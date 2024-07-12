@@ -5,7 +5,6 @@
     flex-wrap: wrap;
     flex-direction: column;
     justify-content: center;
-    padding: 1rem;
     margin: 2rem;
     border-radius: 15px;
     list-style: none;
@@ -48,11 +47,15 @@
     margin-top: 2rem;
     max-height: 50vh;
     font-family: 'Goia', sans-serif;
+    transition: all 0.1s ease-in-out;
+
 }
 
 .lyric-line {
     position: relative;
     margin: 10px 0;
+    transition: all 0.1s ease-in-out;
+
 
     .current-lyric-container {
         position: relative;
@@ -70,7 +73,7 @@
             background: transparent;
             border: none;
             color: transparent;
-            caret-color: $primary-color;
+            caret-color: transparent;
             outline: none;
             z-index: 1;
         }
@@ -81,36 +84,39 @@
     position: relative;
     margin: 10px 0;
     color: #FBDEE2;
+    transition: all 0.1s ease-in-out;
+    .text-input {
+        color: #FBDEE2;
+        caret-color: white;
+        border: none;
+        background: transparent;
+        outline: none;
+        width: 100%;
+        padding: 0;
+        transition: all 0.1s ease-in-out;
+    }
+
+    .right {
+        color: $primary-color;
+    }
+
+    .wrong {
+        color: $error-color;
+    }
 }
 
-.current .text-input {
-    color: #FBDEE2;
-    caret-color: white;
-    border: none;
-    background: transparent;
-    outline: none;
-    width: 100%;
-    padding: 0;
-}
-
-.current .right {
-    color: $primary-color;
-}
-
-.current .wrong {
-    color: $error-color;
-}
-
-.previous,
-.next {
+.previous, .next {
     color: #888;
 }
 
-#caret {
-    display: inline-block;
+.caret {
+    position: absolute;
     width: 3px;
+    height: 100%;
     background-color: $primary-color;
-    animation: blink 1s step-end infinite;
+    animation: blink 1s ease-in-out infinite;
+    transition: all 0.1s ease-in-out;
+    top: 0;
 }
 
 @keyframes blink {

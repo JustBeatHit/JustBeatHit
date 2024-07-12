@@ -4,6 +4,7 @@ import '../../stylesheets/karakaku.scss';
 
 const List: React.FC = () => {
     const songs = [
+        { name: 'Michael_Jackson-Beat_It', title: 'Michael Jackson - Beat It' },
         { name: 'Sabrina_Carpenter-Espresso', title: 'Sabrina Carpenter - Espresso' },
         { name: 'd4vd-Feel_It', title: 'd4vd - Feel It' },
     ];
