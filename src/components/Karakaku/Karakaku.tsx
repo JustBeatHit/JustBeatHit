@@ -28,7 +28,6 @@ const Karakaku: React.FC = () => {
     const caretRef = useRef<HTMLDivElement>(null);
     const [score, setScore] = useState<number>(0);
     const [lastScoreChange, setLastScoreChange] = useState<number>(0);
-    const [pauseStart, setPauseStart] = useState<number | null>(null);
     const [hasErrors, setHasErrors] = useState<boolean>(false);
 
     useEffect(() => {
