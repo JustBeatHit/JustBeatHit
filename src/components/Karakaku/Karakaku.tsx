@@ -174,6 +174,14 @@ const Karakaku: React.FC = () => {
                     return newScore;
                 });
             }
+
+            const alphabeticCharacters = userInputUpdated.match(/[a-zA-Z]/g);
+            if (alphabeticCharacters) {
+                setTotalCharacters(totalCharacters => totalCharacters + alphabeticCharacters.length);
+                console.log('Total characters' + totalCharacters);
+                console.log('Alphabetic characters' + alphabeticCharacters.length);
+            }
+
             if (currentLyricIndex === lyrics.length - 1) {
                 audioPlayerRef.current?.audioEl.current?.pause();
                 setIsStarted(false);
@@ -181,8 +189,6 @@ const Karakaku: React.FC = () => {
             } else if (audioPlayerRef.current?.audioEl.current && audioPlayerRef.current.audioEl.current.paused) {
                 audioPlayerRef.current.audioEl.current.play();
             }
-            setTotalCharacters(totalCharacters => totalCharacters + userInput.length);
-            console.log('Total characters' + totalCharacters);
         }
 
         if (!isStarted && audioPlayerRef.current?.audioEl.current?.paused) {
