@@ -29,6 +29,8 @@ const Karakaku: React.FC = () => {
     const [score, setScore] = useState<number>(0);
     const [lastScoreChange, setLastScoreChange] = useState<number>(0);
     const [hasErrors, setHasErrors] = useState<boolean>(false);
+    const [pauseCount, setPauseCount] = useState<number>(0);
+    const [totalLines, setTotalLines] = useState<number>(0);
 
     useEffect(() => {
         const loadLyrics = async () => {
@@ -40,6 +42,7 @@ const Karakaku: React.FC = () => {
                     text: removeParentheses(lyric.text)
                 }));
                 setLyrics(cleanedLyrics);
+                setTotalLines(cleanedLyrics.length);
             } catch (error) {
                 console.error('Failed to load LRC file:', error);
             }
@@ -94,8 +97,9 @@ const Karakaku: React.FC = () => {
                 if (!isValidated) {
                     audioEl.pause();
                     const points = -500;
+                    handlePause();
                     setScore(prevScore => {
-                        const newScore =  Math.max(prevScore + points, 0);
+                        const newScore = Math.max(prevScore + points, 0);
                         setLastScoreChange(points);
                         return newScore;
                     });
@@ -180,6 +184,10 @@ const Karakaku: React.FC = () => {
         }
     };
 
+    const handlePause = () => {
+        setPauseCount(prevCount => prevCount + 1);
+    };
+
     const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
         e.preventDefault();
     };
@@ -215,6 +223,7 @@ const Karakaku: React.FC = () => {
             return (
                 <div className="final-score">
                     <p>Score final: {score}</p>
+                    <p>Nombre de lignes en pause : {pauseCount} pauses / {totalLines} lignes</p>
                 </div>
             );
         }
