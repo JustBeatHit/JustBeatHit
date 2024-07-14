@@ -94,6 +94,12 @@ const Karakaku: React.FC = () => {
             if (nextLyricTime && currentTime >= nextLyricTime - 0.05) {
                 if (!isValidated) {
                     audioEl.pause();
+                    const points = -500;
+                    setScore(prevScore => {
+                        const newScore =  Math.max(prevScore + points, 0);
+                        setLastScoreChange(points);
+                        return newScore;
+                    });
                 } else {
                     setUserInput('');
                     setLockedChars('');
@@ -243,24 +249,8 @@ const Karakaku: React.FC = () => {
             if (audioEl.paused) {
                 audioEl.play();
                 setIsStarted(true);
-                if (pauseStart) {
-                    const pauseDuration = Date.now() - pauseStart;
-                    let points = 0;
-                    if (pauseDuration > 5000) {
-                        points = -1000;
-                    } else {
-                        points = -300;
-                    }
-                    setScore(prevScore => {
-                        const newScore = Math.max(prevScore + points, 0);
-                        setLastScoreChange(points);
-                        return newScore;
-                    });
-                    setPauseStart(null);
-                }
             } else {
                 audioEl.pause();
-                setPauseStart(Date.now());
             }
         }
     };
