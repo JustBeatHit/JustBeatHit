@@ -31,6 +31,10 @@ const Karakaku: React.FC = () => {
     const [hasErrors, setHasErrors] = useState<boolean>(false);
     const [pauseCount, setPauseCount] = useState<number>(0);
     const [totalLines, setTotalLines] = useState<number>(0);
+    const [startTime, setStartTime] = useState<number>(0);
+    const [endTime, setEndTime] = useState<number>(0);
+    const [incorrectCharacters, setIncorrectCharacters] = useState<number>(0);
+    const [totalCharacters, setTotalCharacters] = useState<number>(0);
 
     useEffect(() => {
         const loadLyrics = async () => {
@@ -154,6 +158,7 @@ const Karakaku: React.FC = () => {
                 setLastScoreChange(points);
                 return newScore;
             });
+            setIncorrectCharacters(incorrectCharacters => incorrectCharacters + 1);
             setHasErrors(true);
         }
 
@@ -169,18 +174,21 @@ const Karakaku: React.FC = () => {
                     return newScore;
                 });
             }
-
             if (currentLyricIndex === lyrics.length - 1) {
                 audioPlayerRef.current?.audioEl.current?.pause();
                 setIsStarted(false);
+                setEndTime(Date.now());
             } else if (audioPlayerRef.current?.audioEl.current && audioPlayerRef.current.audioEl.current.paused) {
                 audioPlayerRef.current.audioEl.current.play();
             }
+            setTotalCharacters(totalCharacters => totalCharacters + userInput.length);
+            console.log('Total characters' + totalCharacters);
         }
 
         if (!isStarted && audioPlayerRef.current?.audioEl.current?.paused) {
             audioPlayerRef.current.audioEl.current.play();
             setIsStarted(true);
+            setStartTime(Date.now());
         }
     };
 
@@ -218,12 +226,37 @@ const Karakaku: React.FC = () => {
         }
     }, [currentLyricIndex, isValidated, lyrics.length]);
 
+    const calculateWPM = (): number => {
+        if (!startTime || !endTime || endTime <= startTime) {
+            return 0;
+        }
+
+        const elapsedTimeInSeconds = (endTime - startTime) / 1000;
+        const words = lyrics.reduce((acc, lyric) => acc + lyric.text.split(' ').length, 0);
+        const wpm = (words / elapsedTimeInSeconds) * 60;
+        return Math.round(wpm);
+    };
+
+    const calculateAccuracy = (): number => {
+        if (!userInput || userInput.length === 0) {
+            return 0;
+        }
+
+        console.log('Total characters' + totalCharacters);
+
+        const accuracy = ((totalCharacters - incorrectCharacters) / totalCharacters) * 100;
+        return Math.round(accuracy);
+    };
+
+
     const renderLyrics = () => {
         if (currentLyricIndex === lyrics.length - 1 && isValidated) {
             return (
                 <div className="final-score">
                     <p>Score final: {score}</p>
                     <p>Nombre de lignes en pause : {pauseCount} pauses / {totalLines} lignes</p>
+                    <p>Vitesse de frappe : {calculateWPM()} mots par minute</p>
+                    <p>Précision d'écriture : {calculateAccuracy()}%</p>
                 </div>
             );
         }
