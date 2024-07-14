@@ -26,6 +26,10 @@ const Karakaku: React.FC = () => {
     const audioPlayerRef = useRef<ReactAudioPlayer>(null);
     const charRefs = useRef<(HTMLSpanElement | null)[][]>([]);
     const caretRef = useRef<HTMLDivElement>(null);
+    const [score, setScore] = useState<number>(0);
+    const [lastScoreChange, setLastScoreChange] = useState<number>(0);
+    const [pauseStart, setPauseStart] = useState<number | null>(null);
+    const [hasErrors, setHasErrors] = useState<boolean>(false);
 
     useEffect(() => {
         const loadLyrics = async () => {
@@ -95,6 +99,7 @@ const Karakaku: React.FC = () => {
                     setLockedChars('');
                     setCurrentLyricIndex(currentLyricIndex + 1);
                     setIsValidated(false);
+                    setHasErrors(false);
                 }
             }
         }
@@ -109,9 +114,7 @@ const Karakaku: React.FC = () => {
         const autoCompleteChars = [' ', '.', ',', '!', '?', ';', ':', '-', '(', ')', '"', "'"];
         let userInputUpdated = inputValue;
 
-        // Vérifie si l'utilisateur a supprimé un caractère
         if (inputValue.length < userInput.length) {
-            // Empêche la suppression des caractères verrouillés
             if (inputValue.length < lockedChars.length) {
                 setUserInput(lockedChars);
                 return;
@@ -121,24 +124,43 @@ const Karakaku: React.FC = () => {
             }
         }
 
-        // Autocompléte les caractères si le prochain caractère est spécial
         while (autoCompleteChars.includes(currentLyric[userInputUpdated.length])) {
             userInputUpdated += currentLyric[userInputUpdated.length];
         }
 
-        // Verrouille les caractères correctement tapés
         const correctPortion = currentLyric.slice(0, userInputUpdated.length);
         const userTypedPortion = userInputUpdated.slice(0, correctPortion.length);
         if (normalizeString(userTypedPortion) === normalizeString(correctPortion)) {
             setLockedChars(userInputUpdated);
+            const points = 100;
+            setScore(prevScore => {
+                const newScore = prevScore + points;
+                setLastScoreChange(points);
+                return newScore;
+            });
+        } else {
+            const points = -300;
+            setScore(prevScore => {
+                const newScore = Math.max(prevScore + points, 0);
+                setLastScoreChange(points);
+                return newScore;
+            });
+            setHasErrors(true);
         }
 
         setUserInput(userInputUpdated);
 
         if (normalizeString(userInputUpdated.trim()) === normalizeString(currentLyric.trim())) {
             setIsValidated(true);
+            if (!hasErrors) {
+                const points = 500;
+                setScore(prevScore => {
+                    const newScore = prevScore + points;
+                    setLastScoreChange(points);
+                    return newScore;
+                });
+            }
 
-            // Si c'est la dernière ligne, on ne redémarre pas l'audio
             if (currentLyricIndex === lyrics.length - 1) {
                 audioPlayerRef.current?.audioEl.current?.pause();
                 setIsStarted(false);
@@ -176,7 +198,22 @@ const Karakaku: React.FC = () => {
         });
     };
 
+    useEffect(() => {
+        if (currentLyricIndex === lyrics.length - 1 && isValidated) {
+            audioPlayerRef.current?.audioEl.current?.pause();
+            setIsStarted(false);
+        }
+    }, [currentLyricIndex, isValidated, lyrics.length]);
+
     const renderLyrics = () => {
+        if (currentLyricIndex === lyrics.length - 1 && isValidated) {
+            return (
+                <div className="final-score">
+                    <p>Score final: {score}</p>
+                </div>
+            );
+        }
+
         return lyrics.map((lyric, index) => (
             <div key={index} className={`lyric-line ${index === currentLyricIndex ? 'current' : ''}`}>
                 {index === currentLyricIndex - 1 && <p className="previous">{lyrics[index].text}</p>}
@@ -206,8 +243,24 @@ const Karakaku: React.FC = () => {
             if (audioEl.paused) {
                 audioEl.play();
                 setIsStarted(true);
+                if (pauseStart) {
+                    const pauseDuration = Date.now() - pauseStart;
+                    let points = 0;
+                    if (pauseDuration > 5000) {
+                        points = -1000;
+                    } else {
+                        points = -300;
+                    }
+                    setScore(prevScore => {
+                        const newScore = Math.max(prevScore + points, 0);
+                        setLastScoreChange(points);
+                        return newScore;
+                    });
+                    setPauseStart(null);
+                }
             } else {
                 audioEl.pause();
+                setPauseStart(Date.now());
             }
         }
     };
@@ -224,6 +277,9 @@ const Karakaku: React.FC = () => {
             <button onClick={handlePlayPauseClick} className="game-start">
                 {audioPlayerRef.current?.audioEl.current?.paused ? 'Play' : 'Pause'}
             </button>
+            <div className="score">
+                <p>Score : {score} ({lastScoreChange > 0 ? '+' : ''}{lastScoreChange})</p>
+            </div>
             <div className="lyrics">
                 {renderLyrics()}
             </div>
