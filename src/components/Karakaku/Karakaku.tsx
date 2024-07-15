@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import ReactAudioPlayer from 'react-audio-player';
 import { parseLRC, LyricLine } from '../../utils/LrcParser';
 import { loadLRCFile } from '../../utils/LrcLoader';
@@ -17,6 +17,7 @@ const removeParentheses = (str: string): string => {
 
 const Karakaku: React.FC = () => {
     const { songName } = useParams<{ songName: string }>();
+    const history = useNavigate();
     const [lyrics, setLyrics] = useState<LyricLine[]>([]);
     const [currentLyricIndex, setCurrentLyricIndex] = useState<number>(0);
     const [userInput, setUserInput] = useState<string>('');
@@ -254,6 +255,26 @@ const Karakaku: React.FC = () => {
         return Math.round(accuracy);
     };
 
+    const handleReplay = () => {
+        setCurrentLyricIndex(0);
+        setUserInput('');
+        setIsValidated(false);
+        setLockedChars('');
+        setIsStarted(false);
+        setScore(0);
+        setLastScoreChange(0);
+        setHasErrors(false);
+        setPauseCount(0);
+        setStartTime(0);
+        setEndTime(0);
+        setIncorrectCharacters(0);
+        setTotalCharacters(0);
+        audioPlayerRef.current?.audioEl.current?.load();
+    };
+
+    const handleReturn = () => {
+        history('/karakaku');
+    };
 
     const renderLyrics = () => {
         if (currentLyricIndex === lyrics.length - 1 && isValidated) {
@@ -263,6 +284,10 @@ const Karakaku: React.FC = () => {
                     <p>Nombre de lignes en pause : {pauseCount} pauses / {totalLines} lignes</p>
                     <p>Vitesse de frappe : {calculateWPM()} mots par minute</p>
                     <p>Précision d'écriture : {calculateAccuracy()}%</p>
+                    <div className="btn-list">
+                        <button className="btn-primary" onClick={handleReplay}>Rejouer</button>
+                        <button className="btn-secondary" onClick={handleReturn}>Retour choix de musiques</button>
+                    </div>
                 </div>
             );
         }
@@ -311,7 +336,7 @@ const Karakaku: React.FC = () => {
                 ref={audioPlayerRef}
                 listenInterval={100}
             />
-            <button onClick={handlePlayPauseClick} className="game-start">
+            <button onClick={handlePlayPauseClick} className="btn-primary">
                 {audioPlayerRef.current?.audioEl.current?.paused ? 'Play' : 'Pause'}
             </button>
             <div className="score">
