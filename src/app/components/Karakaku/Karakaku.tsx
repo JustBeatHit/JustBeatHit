@@ -1,9 +1,10 @@
+'use client';
+
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
 import ReactAudioPlayer from 'react-audio-player';
-import { parseLRC, LyricLine } from '../../utils/LrcParser';
-import { loadLRCFile } from '../../utils/LrcLoader';
-import '../../stylesheets/karakaku.scss';
+import { parseLRC, LyricLine } from '../../../utils/LrcParser';
+import { loadLRCFile } from '../../../utils/LrcLoader';
+import '../../../stylesheets/karakaku.scss';
 
 // Normalise les chaînes et supprime les accents
 const normalizeString = (str: string): string => {
@@ -15,8 +16,10 @@ const removeParentheses = (str: string): string => {
     return str.replace(/\(.*?\)/g, '').trim();
 };
 
-const Karakaku: React.FC = () => {
-    const { songName } = useParams<{ songName: string }>();
+interface KarakakuProps {
+    songName: string;
+}
+const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
     const [lyrics, setLyrics] = useState<LyricLine[]>([]);
     const [currentLyricIndex, setCurrentLyricIndex] = useState<number>(0);
     const [userInput, setUserInput] = useState<string>('');
@@ -26,6 +29,15 @@ const Karakaku: React.FC = () => {
     const audioPlayerRef = useRef<ReactAudioPlayer>(null);
     const charRefs = useRef<(HTMLSpanElement | null)[][]>([]);
     const caretRef = useRef<HTMLDivElement>(null);
+    const [score, setScore] = useState<number>(0);
+    const [lastScoreChange, setLastScoreChange] = useState<number>(0);
+    const [hasErrors, setHasErrors] = useState<boolean>(false);
+    const [pauseCount, setPauseCount] = useState<number>(0);
+    const [totalLines, setTotalLines] = useState<number>(0);
+    const [startTime, setStartTime] = useState<number>(0);
+    const [endTime, setEndTime] = useState<number>(0);
+    const [incorrectCharacters, setIncorrectCharacters] = useState<number>(0);
+    const [totalCharacters, setTotalCharacters] = useState<number>(0);
 
     useEffect(() => {
         const loadLyrics = async () => {
@@ -37,6 +49,7 @@ const Karakaku: React.FC = () => {
                     text: removeParentheses(lyric.text)
                 }));
                 setLyrics(cleanedLyrics);
+                setTotalLines(cleanedLyrics.length);
             } catch (error) {
                 console.error('Failed to load LRC file:', error);
             }
@@ -90,11 +103,19 @@ const Karakaku: React.FC = () => {
             if (nextLyricTime && currentTime >= nextLyricTime - 0.05) {
                 if (!isValidated) {
                     audioEl.pause();
+                    const points = -500;
+                    handlePause();
+                    setScore(prevScore => {
+                        const newScore = Math.max(prevScore + points, 0);
+                        setLastScoreChange(points);
+                        return newScore;
+                    });
                 } else {
                     setUserInput('');
                     setLockedChars('');
                     setCurrentLyricIndex(currentLyricIndex + 1);
                     setIsValidated(false);
+                    setHasErrors(false);
                 }
             }
         }
@@ -109,9 +130,7 @@ const Karakaku: React.FC = () => {
         const autoCompleteChars = [' ', '.', ',', '!', '?', ';', ':', '-', '(', ')', '"', "'"];
         let userInputUpdated = inputValue;
 
-        // Vérifie si l'utilisateur a supprimé un caractère
         if (inputValue.length < userInput.length) {
-            // Empêche la suppression des caractères verrouillés
             if (inputValue.length < lockedChars.length) {
                 setUserInput(lockedChars);
                 return;
@@ -121,27 +140,55 @@ const Karakaku: React.FC = () => {
             }
         }
 
-        // Autocompléte les caractères si le prochain caractère est spécial
         while (autoCompleteChars.includes(currentLyric[userInputUpdated.length])) {
             userInputUpdated += currentLyric[userInputUpdated.length];
         }
 
-        // Verrouille les caractères correctement tapés
         const correctPortion = currentLyric.slice(0, userInputUpdated.length);
         const userTypedPortion = userInputUpdated.slice(0, correctPortion.length);
         if (normalizeString(userTypedPortion) === normalizeString(correctPortion)) {
             setLockedChars(userInputUpdated);
+            const points = 100;
+            setScore(prevScore => {
+                const newScore = prevScore + points;
+                setLastScoreChange(points);
+                return newScore;
+            });
+        } else {
+            const points = -300;
+            setScore(prevScore => {
+                const newScore = Math.max(prevScore + points, 0);
+                setLastScoreChange(points);
+                return newScore;
+            });
+            setIncorrectCharacters(incorrectCharacters => incorrectCharacters + 1);
+            setHasErrors(true);
         }
 
         setUserInput(userInputUpdated);
 
         if (normalizeString(userInputUpdated.trim()) === normalizeString(currentLyric.trim())) {
             setIsValidated(true);
+            if (!hasErrors) {
+                const points = 500;
+                setScore(prevScore => {
+                    const newScore = prevScore + points;
+                    setLastScoreChange(points);
+                    return newScore;
+                });
+            }
 
-            // Si c'est la dernière ligne, on ne redémarre pas l'audio
+            const alphabeticCharacters = userInputUpdated.match(/[a-zA-Z]/g);
+            if (alphabeticCharacters) {
+                setTotalCharacters(totalCharacters => totalCharacters + alphabeticCharacters.length);
+                console.log('Total characters' + totalCharacters);
+                console.log('Alphabetic characters' + alphabeticCharacters.length);
+            }
+
             if (currentLyricIndex === lyrics.length - 1) {
                 audioPlayerRef.current?.audioEl.current?.pause();
                 setIsStarted(false);
+                setEndTime(Date.now());
             } else if (audioPlayerRef.current?.audioEl.current && audioPlayerRef.current.audioEl.current.paused) {
                 audioPlayerRef.current.audioEl.current.play();
             }
@@ -150,7 +197,12 @@ const Karakaku: React.FC = () => {
         if (!isStarted && audioPlayerRef.current?.audioEl.current?.paused) {
             audioPlayerRef.current.audioEl.current.play();
             setIsStarted(true);
+            setStartTime(Date.now());
         }
+    };
+
+    const handlePause = () => {
+        setPauseCount(prevCount => prevCount + 1);
     };
 
     const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
@@ -169,14 +221,55 @@ const Karakaku: React.FC = () => {
                 charRefs.current[currentLyricIndex] = [];
             }
             return (
-                <span key={index} className={className} ref={el => charRefs.current[currentLyricIndex][index] = el}>
+                <span key={index} className={className} ref={el => { charRefs.current[currentLyricIndex][index] = el; }}>
                     {char}
                 </span>
             );
         });
     };
 
+    useEffect(() => {
+        if (currentLyricIndex === lyrics.length - 1 && isValidated) {
+            audioPlayerRef.current?.audioEl.current?.pause();
+            setIsStarted(false);
+        }
+    }, [currentLyricIndex, isValidated, lyrics.length]);
+
+    const calculateWPM = (): number => {
+        if (!startTime || !endTime || endTime <= startTime) {
+            return 0;
+        }
+
+        const elapsedTimeInSeconds = (endTime - startTime) / 1000;
+        const words = lyrics.reduce((acc, lyric) => acc + lyric.text.split(' ').length, 0);
+        const wpm = (words / elapsedTimeInSeconds) * 60;
+        return Math.round(wpm);
+    };
+
+    const calculateAccuracy = (): number => {
+        if (!userInput || userInput.length === 0) {
+            return 0;
+        }
+
+        console.log('Total characters' + totalCharacters);
+
+        const accuracy = ((totalCharacters - incorrectCharacters) / totalCharacters) * 100;
+        return Math.round(accuracy);
+    };
+
+
     const renderLyrics = () => {
+        if (currentLyricIndex === lyrics.length - 1 && isValidated) {
+            return (
+                <div className="final-score">
+                    <p>Score final: {score}</p>
+                    <p>Nombre de lignes en pause : {pauseCount} pauses / {totalLines} lignes</p>
+                    <p>Vitesse de frappe : {calculateWPM()} mots par minute</p>
+                    <p>Précision d'écriture : {calculateAccuracy()}%</p>
+                </div>
+            );
+        }
+
         return lyrics.map((lyric, index) => (
             <div key={index} className={`lyric-line ${index === currentLyricIndex ? 'current' : ''}`}>
                 {index === currentLyricIndex - 1 && <p className="previous">{lyrics[index].text}</p>}
@@ -224,6 +317,9 @@ const Karakaku: React.FC = () => {
             <button onClick={handlePlayPauseClick} className="game-start">
                 {audioPlayerRef.current?.audioEl.current?.paused ? 'Play' : 'Pause'}
             </button>
+            <div className="score">
+                <p>Score : {score} ({lastScoreChange > 0 ? '+' : ''}{lastScoreChange})</p>
+            </div>
             <div className="lyrics">
                 {renderLyrics()}
             </div>
