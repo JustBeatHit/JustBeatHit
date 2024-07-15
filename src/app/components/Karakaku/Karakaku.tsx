@@ -5,6 +5,7 @@ import ReactAudioPlayer from 'react-audio-player';
 import { parseLRC, LyricLine } from '../../../utils/LrcParser';
 import { loadLRCFile } from '../../../utils/LrcLoader';
 import '../../../stylesheets/karakaku.scss';
+import Link from 'next/link';
 
 // Normalise les chaînes et supprime les accents
 const normalizeString = (str: string): string => {
@@ -38,6 +39,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
     const [endTime, setEndTime] = useState<number>(0);
     const [incorrectCharacters, setIncorrectCharacters] = useState<number>(0);
     const [totalCharacters, setTotalCharacters] = useState<number>(0);
+    const [isGameOver, setIsGameOver] = useState<boolean>(false);
 
     useEffect(() => {
         const loadLyrics = async () => {
@@ -181,14 +183,13 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
             const alphabeticCharacters = userInputUpdated.match(/[a-zA-Z]/g);
             if (alphabeticCharacters) {
                 setTotalCharacters(totalCharacters => totalCharacters + alphabeticCharacters.length);
-                console.log('Total characters' + totalCharacters);
-                console.log('Alphabetic characters' + alphabeticCharacters.length);
             }
 
             if (currentLyricIndex === lyrics.length - 1) {
                 audioPlayerRef.current?.audioEl.current?.pause();
                 setIsStarted(false);
                 setEndTime(Date.now());
+                setIsGameOver(true);
             } else if (audioPlayerRef.current?.audioEl.current && audioPlayerRef.current.audioEl.current.paused) {
                 audioPlayerRef.current.audioEl.current.play();
             }
@@ -232,6 +233,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         if (currentLyricIndex === lyrics.length - 1 && isValidated) {
             audioPlayerRef.current?.audioEl.current?.pause();
             setIsStarted(false);
+            setIsGameOver(true);
         }
     }, [currentLyricIndex, isValidated, lyrics.length]);
 
@@ -250,13 +252,27 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         if (!userInput || userInput.length === 0) {
             return 0;
         }
-
-        console.log('Total characters' + totalCharacters);
-
         const accuracy = ((totalCharacters - incorrectCharacters) / totalCharacters) * 100;
         return Math.round(accuracy);
     };
 
+    const handleReplay = () => {
+        setCurrentLyricIndex(0);
+        setUserInput('');
+        setIsValidated(false);
+        setLockedChars('');
+        setIsStarted(false);
+        setIsGameOver(false);
+        setScore(0);
+        setLastScoreChange(0);
+        setHasErrors(false);
+        setPauseCount(0);
+        setStartTime(0);
+        setEndTime(0);
+        setIncorrectCharacters(0);
+        setTotalCharacters(0);
+        audioPlayerRef.current?.audioEl.current?.load();
+    };
 
     const renderLyrics = () => {
         if (currentLyricIndex === lyrics.length - 1 && isValidated) {
@@ -266,6 +282,12 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
                     <p>Nombre de lignes en pause : {pauseCount} pauses / {totalLines} lignes</p>
                     <p>Vitesse de frappe : {calculateWPM()} mots par minute</p>
                     <p>Précision d'écriture : {calculateAccuracy()}%</p>
+                    <div className="btn-list">
+                        <button className="btn-primary" onClick={handleReplay}>Rejouer</button>
+                        <Link href="/karakaku">
+                            <button className="btn-secondary">Retour choix de musiques</button>
+                        </Link>
+                    </div>
                 </div>
             );
         }
@@ -307,19 +329,25 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
 
     return (
         <div className="karakaku">
-            <ReactAudioPlayer
-                src={`/songs/${songName}/song.mp3`}
-                controls
-                onListen={handleTimeUpdate}
-                ref={audioPlayerRef}
-                listenInterval={100}
-            />
-            <button onClick={handlePlayPauseClick} className="game-start">
-                {audioPlayerRef.current?.audioEl.current?.paused ? 'Play' : 'Pause'}
-            </button>
-            <div className="score">
-                <p>Score : {score} ({lastScoreChange > 0 ? '+' : ''}{lastScoreChange})</p>
-            </div>
+            {!isGameOver && (
+                <>
+                    <ReactAudioPlayer
+                        src={`/songs/${songName}/song.mp3`}
+                        controls
+                        onListen={handleTimeUpdate}
+                        ref={audioPlayerRef}
+                        listenInterval={100}
+                    />
+                    {!isStarted && (
+                        <button onClick={handlePlayPauseClick} className="btn-primary">
+                            {audioPlayerRef.current?.audioEl.current?.paused ? 'Play' : 'Pause'}
+                        </button>
+                    )}
+                    <div className="score">
+                        <p>Score : {score} ({lastScoreChange > 0 ? '+' : ''}{lastScoreChange})</p>
+                    </div>
+                </>
+            )}
             <div className="lyrics">
                 {renderLyrics()}
             </div>
