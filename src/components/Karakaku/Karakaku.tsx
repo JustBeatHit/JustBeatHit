@@ -36,6 +36,7 @@ const Karakaku: React.FC = () => {
     const [endTime, setEndTime] = useState<number>(0);
     const [incorrectCharacters, setIncorrectCharacters] = useState<number>(0);
     const [totalCharacters, setTotalCharacters] = useState<number>(0);
+    const [isGameOver, setIsGameOver] = useState<boolean>(false);
 
     useEffect(() => {
         const loadLyrics = async () => {
@@ -187,6 +188,7 @@ const Karakaku: React.FC = () => {
                 audioPlayerRef.current?.audioEl.current?.pause();
                 setIsStarted(false);
                 setEndTime(Date.now());
+                setIsGameOver(true);
             } else if (audioPlayerRef.current?.audioEl.current && audioPlayerRef.current.audioEl.current.paused) {
                 audioPlayerRef.current.audioEl.current.play();
             }
@@ -230,6 +232,7 @@ const Karakaku: React.FC = () => {
         if (currentLyricIndex === lyrics.length - 1 && isValidated) {
             audioPlayerRef.current?.audioEl.current?.pause();
             setIsStarted(false);
+            setIsGameOver(true);
         }
     }, [currentLyricIndex, isValidated, lyrics.length]);
 
@@ -261,6 +264,7 @@ const Karakaku: React.FC = () => {
         setIsValidated(false);
         setLockedChars('');
         setIsStarted(false);
+        setIsGameOver(false);
         setScore(0);
         setLastScoreChange(0);
         setHasErrors(false);
@@ -329,21 +333,25 @@ const Karakaku: React.FC = () => {
 
     return (
         <div className="karakaku">
-            <ReactAudioPlayer
-                src={`/songs/${songName}/song.mp3`}
-                controls
-                onListen={handleTimeUpdate}
-                ref={audioPlayerRef}
-                listenInterval={100}
-            />
-            {!isStarted && (
-                <button onClick={handlePlayPauseClick} className="btn-primary">
-                    {audioPlayerRef.current?.audioEl.current?.paused ? 'Play' : 'Pause'}
-                </button>
+            {!isGameOver && (
+                <>
+                    <ReactAudioPlayer
+                        src={`/songs/${songName}/song.mp3`}
+                        controls
+                        onListen={handleTimeUpdate}
+                        ref={audioPlayerRef}
+                        listenInterval={100}
+                    />
+                    {!isStarted && (
+                        <button onClick={handlePlayPauseClick} className="btn-primary">
+                            {audioPlayerRef.current?.audioEl.current?.paused ? 'Play' : 'Pause'}
+                        </button>
+                    )}
+                    <div className="score">
+                        <p>Score : {score} ({lastScoreChange > 0 ? '+' : ''}{lastScoreChange})</p>
+                    </div>
+                </>
             )}
-            <div className="score">
-                <p>Score : {score} ({lastScoreChange > 0 ? '+' : ''}{lastScoreChange})</p>
-            </div>
             <div className="lyrics">
                 {renderLyrics()}
             </div>
