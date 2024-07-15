@@ -36,8 +36,17 @@
     align-items: center;
 }
 
-.game-start {
+.btn-list{
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+.btn-primary {
     @include button($primary-color);
+}
+
+.btn-secondary {
+    @include button($error-color);
 }
 
 .lyrics, .text-input {
