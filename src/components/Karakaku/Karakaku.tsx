@@ -336,9 +336,11 @@ const Karakaku: React.FC = () => {
                 ref={audioPlayerRef}
                 listenInterval={100}
             />
-            <button onClick={handlePlayPauseClick} className="btn-primary">
-                {audioPlayerRef.current?.audioEl.current?.paused ? 'Play' : 'Pause'}
-            </button>
+            {!isStarted && (
+                <button onClick={handlePlayPauseClick} className="btn-primary">
+                    {audioPlayerRef.current?.audioEl.current?.paused ? 'Play' : 'Pause'}
+                </button>
+            )}
             <div className="score">
                 <p>Score : {score} ({lastScoreChange > 0 ? '+' : ''}{lastScoreChange})</p>
             </div>
