@@ -26,3 +26,47 @@ export async function authSignUp(
     }
     redirect(`/auth/confirm?email=${String(formData.get("email"))}`)
 }
+
+export async function authSendVerificationCode(
+    prevState: { message: string; erroMessage: string},
+    formData: FormData,
+) {
+    let currentState;
+    try {
+        /**
+         * @todo: validate input
+         */
+
+        await resendSignUpCode({
+            username: String(formData.get("email")),
+        })
+        currentState = {
+            ...prevState,
+            message: "Code send successfully"
+        }
+    } catch (error) {
+        currentState = {
+            ...prevState,
+            errorMessage: getErrorMessage(error)
+        }
+    }
+    return currentState
+}
+
+export async function authConfirmSignUp(
+    prevState: string | undefined,
+    formData: FormData
+){
+    try {
+        const { isSignUpComplete, nextStep: {signUpStep} } = await confirmSignUp({
+            username: String(formData.get("email")),
+            confirmationCode: String(formData.get("code")),
+        })
+        if(signUpStep === "COMPLETE_AUTO_SIGN_IN"){
+            await autoSignIn()
+        }
+    } catch (error) {
+        return getErrorMessage(error)
+    }
+    redirect("/auth/login")
+}
