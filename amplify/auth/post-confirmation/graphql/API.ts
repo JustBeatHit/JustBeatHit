@@ -26,7 +26,7 @@ export type Message = {
   conversation?: Conversation | null,
   conversationId: string,
   createdAt: string,
-  messageId: string,
+  id: string,
   owner?: string | null,
   sender?: ConversationUser | null,
   updatedAt: string,
@@ -48,11 +48,11 @@ export type ConversationUser = {
 
 export type UserProfile = {
   __typename: "UserProfile",
-  conversations?: ModelConversationUserConnection | null,
+  Players?: ModelPlayerConnection | null,
+  conversationUsers?: ModelConversationUserConnection | null,
   createdAt: string,
   incomingFriendRequests?: ModelFriendRequestConnection | null,
   outgoingFriendRequests?: ModelFriendRequestConnection | null,
-  partys?: ModelPlayerConnection | null,
   pricingPlan?: string | null,
   profileOwner: string,
   profilePicture?: string | null,
@@ -60,6 +60,45 @@ export type UserProfile = {
   updatedAt: string,
   userId: string,
 };
+
+export type ModelPlayerConnection = {
+  __typename: "ModelPlayerConnection",
+  items:  Array<Player | null >,
+  nextToken?: string | null,
+};
+
+export type Player = {
+  __typename: "Player",
+  charPos?: number | null,
+  createdAt: string,
+  id: string,
+  owner?: string | null,
+  party?: Party | null,
+  partyId: string,
+  profileId: string,
+  score: number,
+  updatedAt: string,
+  user?: UserProfile | null,
+};
+
+export type Party = {
+  __typename: "Party",
+  conversation?: Conversation | null,
+  createdAt: string,
+  id: string,
+  owner?: string | null,
+  players?: ModelPlayerConnection | null,
+  scores?: string | null,
+  status?: PartyStatus | null,
+  updatedAt: string,
+};
+
+export enum PartyStatus {
+  Done = "Done",
+  InProgress = "InProgress",
+  Waiting = "Waiting",
+}
+
 
 export type ModelConversationUserConnection = {
   __typename: "ModelConversationUserConnection",
@@ -90,45 +129,6 @@ export enum FriendRequestStatus {
   accepted = "accepted",
   pending = "pending",
   rejected = "rejected",
-}
-
-
-export type ModelPlayerConnection = {
-  __typename: "ModelPlayerConnection",
-  items:  Array<Player | null >,
-  nextToken?: string | null,
-};
-
-export type Player = {
-  __typename: "Player",
-  charPos?: number | null,
-  createdAt: string,
-  id: string,
-  owner?: string | null,
-  party?: Party | null,
-  partyId: string,
-  profileId: string,
-  score: number,
-  updatedAt: string,
-  user?: UserProfile | null,
-};
-
-export type Party = {
-  __typename: "Party",
-  conversation?: Conversation | null,
-  createdAt: string,
-  id: string,
-  owner?: string | null,
-  scores?: string | null,
-  status?: PartyStatus | null,
-  updatedAt: string,
-  users?: ModelPlayerConnection | null,
-};
-
-export enum PartyStatus {
-  Done = "Done",
-  InProgress = "InProgress",
-  Waiting = "Waiting",
 }
 
 
@@ -248,7 +248,6 @@ export type ModelMessageFilterInput = {
   conversationId?: ModelIDInput | null,
   createdAt?: ModelStringInput | null,
   id?: ModelIDInput | null,
-  messageId?: ModelIDInput | null,
   not?: ModelMessageFilterInput | null,
   or?: Array< ModelMessageFilterInput | null > | null,
   owner?: ModelStringInput | null,
@@ -391,7 +390,7 @@ export type ModelMessageConditionInput = {
 export type CreateMessageInput = {
   content: string,
   conversationId: string,
-  messageId: string,
+  id?: string | null,
   userId: string,
 };
 
@@ -466,7 +465,7 @@ export type DeleteFriendRequestInput = {
 };
 
 export type DeleteMessageInput = {
-  messageId: string,
+  id: string,
 };
 
 export type DeletePartyInput = {
@@ -502,7 +501,7 @@ export type UpdateFriendRequestInput = {
 export type UpdateMessageInput = {
   content?: string | null,
   conversationId?: string | null,
-  messageId: string,
+  id: string,
   userId?: string | null,
 };
 
@@ -598,7 +597,6 @@ export type ModelSubscriptionMessageFilterInput = {
   conversationId?: ModelSubscriptionIDInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   id?: ModelSubscriptionIDInput | null,
-  messageId?: ModelSubscriptionIDInput | null,
   or?: Array< ModelSubscriptionMessageFilterInput | null > | null,
   owner?: ModelStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
@@ -762,7 +760,7 @@ export type GetFriendRequestQuery = {
 };
 
 export type GetMessageQueryVariables = {
-  messageId: string,
+  id: string,
 };
 
 export type GetMessageQuery = {
@@ -779,7 +777,7 @@ export type GetMessageQuery = {
     } | null,
     conversationId: string,
     createdAt: string,
-    messageId: string,
+    id: string,
     owner?: string | null,
     sender?:  {
       __typename: "ConversationUser",
@@ -813,13 +811,13 @@ export type GetPartyQuery = {
     createdAt: string,
     id: string,
     owner?: string | null,
-    scores?: string | null,
-    status?: PartyStatus | null,
-    updatedAt: string,
-    users?:  {
+    players?:  {
       __typename: "ModelPlayerConnection",
       nextToken?: string | null,
     } | null,
+    scores?: string | null,
+    status?: PartyStatus | null,
+    updatedAt: string,
   } | null,
 };
 
@@ -867,7 +865,11 @@ export type GetUserProfileQueryVariables = {
 export type GetUserProfileQuery = {
   getUserProfile?:  {
     __typename: "UserProfile",
-    conversations?:  {
+    Players?:  {
+      __typename: "ModelPlayerConnection",
+      nextToken?: string | null,
+    } | null,
+    conversationUsers?:  {
       __typename: "ModelConversationUserConnection",
       nextToken?: string | null,
     } | null,
@@ -878,10 +880,6 @@ export type GetUserProfileQuery = {
     } | null,
     outgoingFriendRequests?:  {
       __typename: "ModelFriendRequestConnection",
-      nextToken?: string | null,
-    } | null,
-    partys?:  {
-      __typename: "ModelPlayerConnection",
       nextToken?: string | null,
     } | null,
     pricingPlan?: string | null,
@@ -964,9 +962,7 @@ export type ListFriendRequestsQuery = {
 export type ListMessagesQueryVariables = {
   filter?: ModelMessageFilterInput | null,
   limit?: number | null,
-  messageId?: string | null,
   nextToken?: string | null,
-  sortDirection?: ModelSortDirection | null,
 };
 
 export type ListMessagesQuery = {
@@ -977,7 +973,7 @@ export type ListMessagesQuery = {
       content: string,
       conversationId: string,
       createdAt: string,
-      messageId: string,
+      id: string,
       owner?: string | null,
       updatedAt: string,
       userId: string,
@@ -1220,7 +1216,7 @@ export type CreateMessageMutation = {
     } | null,
     conversationId: string,
     createdAt: string,
-    messageId: string,
+    id: string,
     owner?: string | null,
     sender?:  {
       __typename: "ConversationUser",
@@ -1255,13 +1251,13 @@ export type CreatePartyMutation = {
     createdAt: string,
     id: string,
     owner?: string | null,
-    scores?: string | null,
-    status?: PartyStatus | null,
-    updatedAt: string,
-    users?:  {
+    players?:  {
       __typename: "ModelPlayerConnection",
       nextToken?: string | null,
     } | null,
+    scores?: string | null,
+    status?: PartyStatus | null,
+    updatedAt: string,
   } | null,
 };
 
@@ -1311,7 +1307,11 @@ export type CreateUserProfileMutationVariables = {
 export type CreateUserProfileMutation = {
   createUserProfile?:  {
     __typename: "UserProfile",
-    conversations?:  {
+    Players?:  {
+      __typename: "ModelPlayerConnection",
+      nextToken?: string | null,
+    } | null,
+    conversationUsers?:  {
       __typename: "ModelConversationUserConnection",
       nextToken?: string | null,
     } | null,
@@ -1322,10 +1322,6 @@ export type CreateUserProfileMutation = {
     } | null,
     outgoingFriendRequests?:  {
       __typename: "ModelFriendRequestConnection",
-      nextToken?: string | null,
-    } | null,
-    partys?:  {
-      __typename: "ModelPlayerConnection",
       nextToken?: string | null,
     } | null,
     pricingPlan?: string | null,
@@ -1466,7 +1462,7 @@ export type DeleteMessageMutation = {
     } | null,
     conversationId: string,
     createdAt: string,
-    messageId: string,
+    id: string,
     owner?: string | null,
     sender?:  {
       __typename: "ConversationUser",
@@ -1501,13 +1497,13 @@ export type DeletePartyMutation = {
     createdAt: string,
     id: string,
     owner?: string | null,
-    scores?: string | null,
-    status?: PartyStatus | null,
-    updatedAt: string,
-    users?:  {
+    players?:  {
       __typename: "ModelPlayerConnection",
       nextToken?: string | null,
     } | null,
+    scores?: string | null,
+    status?: PartyStatus | null,
+    updatedAt: string,
   } | null,
 };
 
@@ -1557,7 +1553,11 @@ export type DeleteUserProfileMutationVariables = {
 export type DeleteUserProfileMutation = {
   deleteUserProfile?:  {
     __typename: "UserProfile",
-    conversations?:  {
+    Players?:  {
+      __typename: "ModelPlayerConnection",
+      nextToken?: string | null,
+    } | null,
+    conversationUsers?:  {
       __typename: "ModelConversationUserConnection",
       nextToken?: string | null,
     } | null,
@@ -1568,10 +1568,6 @@ export type DeleteUserProfileMutation = {
     } | null,
     outgoingFriendRequests?:  {
       __typename: "ModelFriendRequestConnection",
-      nextToken?: string | null,
-    } | null,
-    partys?:  {
-      __typename: "ModelPlayerConnection",
       nextToken?: string | null,
     } | null,
     pricingPlan?: string | null,
@@ -1712,7 +1708,7 @@ export type UpdateMessageMutation = {
     } | null,
     conversationId: string,
     createdAt: string,
-    messageId: string,
+    id: string,
     owner?: string | null,
     sender?:  {
       __typename: "ConversationUser",
@@ -1747,13 +1743,13 @@ export type UpdatePartyMutation = {
     createdAt: string,
     id: string,
     owner?: string | null,
-    scores?: string | null,
-    status?: PartyStatus | null,
-    updatedAt: string,
-    users?:  {
+    players?:  {
       __typename: "ModelPlayerConnection",
       nextToken?: string | null,
     } | null,
+    scores?: string | null,
+    status?: PartyStatus | null,
+    updatedAt: string,
   } | null,
 };
 
@@ -1803,7 +1799,11 @@ export type UpdateUserProfileMutationVariables = {
 export type UpdateUserProfileMutation = {
   updateUserProfile?:  {
     __typename: "UserProfile",
-    conversations?:  {
+    Players?:  {
+      __typename: "ModelPlayerConnection",
+      nextToken?: string | null,
+    } | null,
+    conversationUsers?:  {
       __typename: "ModelConversationUserConnection",
       nextToken?: string | null,
     } | null,
@@ -1814,10 +1814,6 @@ export type UpdateUserProfileMutation = {
     } | null,
     outgoingFriendRequests?:  {
       __typename: "ModelFriendRequestConnection",
-      nextToken?: string | null,
-    } | null,
-    partys?:  {
-      __typename: "ModelPlayerConnection",
       nextToken?: string | null,
     } | null,
     pricingPlan?: string | null,
@@ -1954,7 +1950,7 @@ export type OnCreateMessageSubscription = {
     } | null,
     conversationId: string,
     createdAt: string,
-    messageId: string,
+    id: string,
     owner?: string | null,
     sender?:  {
       __typename: "ConversationUser",
@@ -1988,13 +1984,13 @@ export type OnCreatePartySubscription = {
     createdAt: string,
     id: string,
     owner?: string | null,
-    scores?: string | null,
-    status?: PartyStatus | null,
-    updatedAt: string,
-    users?:  {
+    players?:  {
       __typename: "ModelPlayerConnection",
       nextToken?: string | null,
     } | null,
+    scores?: string | null,
+    status?: PartyStatus | null,
+    updatedAt: string,
   } | null,
 };
 
@@ -2043,7 +2039,11 @@ export type OnCreateUserProfileSubscriptionVariables = {
 export type OnCreateUserProfileSubscription = {
   onCreateUserProfile?:  {
     __typename: "UserProfile",
-    conversations?:  {
+    Players?:  {
+      __typename: "ModelPlayerConnection",
+      nextToken?: string | null,
+    } | null,
+    conversationUsers?:  {
       __typename: "ModelConversationUserConnection",
       nextToken?: string | null,
     } | null,
@@ -2054,10 +2054,6 @@ export type OnCreateUserProfileSubscription = {
     } | null,
     outgoingFriendRequests?:  {
       __typename: "ModelFriendRequestConnection",
-      nextToken?: string | null,
-    } | null,
-    partys?:  {
-      __typename: "ModelPlayerConnection",
       nextToken?: string | null,
     } | null,
     pricingPlan?: string | null,
@@ -2194,7 +2190,7 @@ export type OnDeleteMessageSubscription = {
     } | null,
     conversationId: string,
     createdAt: string,
-    messageId: string,
+    id: string,
     owner?: string | null,
     sender?:  {
       __typename: "ConversationUser",
@@ -2228,13 +2224,13 @@ export type OnDeletePartySubscription = {
     createdAt: string,
     id: string,
     owner?: string | null,
-    scores?: string | null,
-    status?: PartyStatus | null,
-    updatedAt: string,
-    users?:  {
+    players?:  {
       __typename: "ModelPlayerConnection",
       nextToken?: string | null,
     } | null,
+    scores?: string | null,
+    status?: PartyStatus | null,
+    updatedAt: string,
   } | null,
 };
 
@@ -2283,7 +2279,11 @@ export type OnDeleteUserProfileSubscriptionVariables = {
 export type OnDeleteUserProfileSubscription = {
   onDeleteUserProfile?:  {
     __typename: "UserProfile",
-    conversations?:  {
+    Players?:  {
+      __typename: "ModelPlayerConnection",
+      nextToken?: string | null,
+    } | null,
+    conversationUsers?:  {
       __typename: "ModelConversationUserConnection",
       nextToken?: string | null,
     } | null,
@@ -2294,10 +2294,6 @@ export type OnDeleteUserProfileSubscription = {
     } | null,
     outgoingFriendRequests?:  {
       __typename: "ModelFriendRequestConnection",
-      nextToken?: string | null,
-    } | null,
-    partys?:  {
-      __typename: "ModelPlayerConnection",
       nextToken?: string | null,
     } | null,
     pricingPlan?: string | null,
@@ -2434,7 +2430,7 @@ export type OnUpdateMessageSubscription = {
     } | null,
     conversationId: string,
     createdAt: string,
-    messageId: string,
+    id: string,
     owner?: string | null,
     sender?:  {
       __typename: "ConversationUser",
@@ -2468,13 +2464,13 @@ export type OnUpdatePartySubscription = {
     createdAt: string,
     id: string,
     owner?: string | null,
-    scores?: string | null,
-    status?: PartyStatus | null,
-    updatedAt: string,
-    users?:  {
+    players?:  {
       __typename: "ModelPlayerConnection",
       nextToken?: string | null,
     } | null,
+    scores?: string | null,
+    status?: PartyStatus | null,
+    updatedAt: string,
   } | null,
 };
 
@@ -2523,7 +2519,11 @@ export type OnUpdateUserProfileSubscriptionVariables = {
 export type OnUpdateUserProfileSubscription = {
   onUpdateUserProfile?:  {
     __typename: "UserProfile",
-    conversations?:  {
+    Players?:  {
+      __typename: "ModelPlayerConnection",
+      nextToken?: string | null,
+    } | null,
+    conversationUsers?:  {
       __typename: "ModelConversationUserConnection",
       nextToken?: string | null,
     } | null,
@@ -2534,10 +2534,6 @@ export type OnUpdateUserProfileSubscription = {
     } | null,
     outgoingFriendRequests?:  {
       __typename: "ModelFriendRequestConnection",
-      nextToken?: string | null,
-    } | null,
-    partys?:  {
-      __typename: "ModelPlayerConnection",
       nextToken?: string | null,
     } | null,
     pricingPlan?: string | null,

@@ -131,7 +131,7 @@ export const onCreateMessage = /* GraphQL */ `subscription OnCreateMessage($filt
     }
     conversationId
     createdAt
-    messageId
+    id
     owner
     sender {
       conversationId
@@ -164,13 +164,13 @@ export const onCreateParty = /* GraphQL */ `subscription OnCreateParty($filter: 
     createdAt
     id
     owner
-    scores
-    status
-    updatedAt
-    users {
+    players {
       nextToken
       __typename
     }
+    scores
+    status
+    updatedAt
     __typename
   }
 }
@@ -219,7 +219,11 @@ export const onCreateUserProfile = /* GraphQL */ `subscription OnCreateUserProfi
   $profileOwner: String
 ) {
   onCreateUserProfile(filter: $filter, profileOwner: $profileOwner) {
-    conversations {
+    Players {
+      nextToken
+      __typename
+    }
+    conversationUsers {
       nextToken
       __typename
     }
@@ -229,10 +233,6 @@ export const onCreateUserProfile = /* GraphQL */ `subscription OnCreateUserProfi
       __typename
     }
     outgoingFriendRequests {
-      nextToken
-      __typename
-    }
-    partys {
       nextToken
       __typename
     }
@@ -372,7 +372,7 @@ export const onDeleteMessage = /* GraphQL */ `subscription OnDeleteMessage($filt
     }
     conversationId
     createdAt
-    messageId
+    id
     owner
     sender {
       conversationId
@@ -405,13 +405,13 @@ export const onDeleteParty = /* GraphQL */ `subscription OnDeleteParty($filter: 
     createdAt
     id
     owner
-    scores
-    status
-    updatedAt
-    users {
+    players {
       nextToken
       __typename
     }
+    scores
+    status
+    updatedAt
     __typename
   }
 }
@@ -460,7 +460,11 @@ export const onDeleteUserProfile = /* GraphQL */ `subscription OnDeleteUserProfi
   $profileOwner: String
 ) {
   onDeleteUserProfile(filter: $filter, profileOwner: $profileOwner) {
-    conversations {
+    Players {
+      nextToken
+      __typename
+    }
+    conversationUsers {
       nextToken
       __typename
     }
@@ -470,10 +474,6 @@ export const onDeleteUserProfile = /* GraphQL */ `subscription OnDeleteUserProfi
       __typename
     }
     outgoingFriendRequests {
-      nextToken
-      __typename
-    }
-    partys {
       nextToken
       __typename
     }
@@ -613,7 +613,7 @@ export const onUpdateMessage = /* GraphQL */ `subscription OnUpdateMessage($filt
     }
     conversationId
     createdAt
-    messageId
+    id
     owner
     sender {
       conversationId
@@ -646,13 +646,13 @@ export const onUpdateParty = /* GraphQL */ `subscription OnUpdateParty($filter: 
     createdAt
     id
     owner
-    scores
-    status
-    updatedAt
-    users {
+    players {
       nextToken
       __typename
     }
+    scores
+    status
+    updatedAt
     __typename
   }
 }
@@ -701,7 +701,11 @@ export const onUpdateUserProfile = /* GraphQL */ `subscription OnUpdateUserProfi
   $profileOwner: String
 ) {
   onUpdateUserProfile(filter: $filter, profileOwner: $profileOwner) {
-    conversations {
+    Players {
+      nextToken
+      __typename
+    }
+    conversationUsers {
       nextToken
       __typename
     }
@@ -711,10 +715,6 @@ export const onUpdateUserProfile = /* GraphQL */ `subscription OnUpdateUserProfi
       __typename
     }
     outgoingFriendRequests {
-      nextToken
-      __typename
-    }
-    partys {
       nextToken
       __typename
     }

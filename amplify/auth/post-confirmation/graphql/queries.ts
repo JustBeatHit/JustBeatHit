@@ -112,8 +112,8 @@ export const getFriendRequest = /* GraphQL */ `query GetFriendRequest($requestId
   APITypes.GetFriendRequestQueryVariables,
   APITypes.GetFriendRequestQuery
 >;
-export const getMessage = /* GraphQL */ `query GetMessage($messageId: ID!) {
-  getMessage(messageId: $messageId) {
+export const getMessage = /* GraphQL */ `query GetMessage($id: ID!) {
+  getMessage(id: $id) {
     content
     conversation {
       createdAt
@@ -125,7 +125,7 @@ export const getMessage = /* GraphQL */ `query GetMessage($messageId: ID!) {
     }
     conversationId
     createdAt
-    messageId
+    id
     owner
     sender {
       conversationId
@@ -158,13 +158,13 @@ export const getParty = /* GraphQL */ `query GetParty($id: ID!) {
     createdAt
     id
     owner
-    scores
-    status
-    updatedAt
-    users {
+    players {
       nextToken
       __typename
     }
+    scores
+    status
+    updatedAt
     __typename
   }
 }
@@ -204,7 +204,11 @@ export const getPlayer = /* GraphQL */ `query GetPlayer($id: ID!) {
 ` as GeneratedQuery<APITypes.GetPlayerQueryVariables, APITypes.GetPlayerQuery>;
 export const getUserProfile = /* GraphQL */ `query GetUserProfile($userId: String!) {
   getUserProfile(userId: $userId) {
-    conversations {
+    Players {
+      nextToken
+      __typename
+    }
+    conversationUsers {
       nextToken
       __typename
     }
@@ -214,10 +218,6 @@ export const getUserProfile = /* GraphQL */ `query GetUserProfile($userId: Strin
       __typename
     }
     outgoingFriendRequests {
-      nextToken
-      __typename
-    }
-    partys {
       nextToken
       __typename
     }
@@ -314,22 +314,14 @@ export const listFriendRequests = /* GraphQL */ `query ListFriendRequests(
 export const listMessages = /* GraphQL */ `query ListMessages(
   $filter: ModelMessageFilterInput
   $limit: Int
-  $messageId: ID
   $nextToken: String
-  $sortDirection: ModelSortDirection
 ) {
-  listMessages(
-    filter: $filter
-    limit: $limit
-    messageId: $messageId
-    nextToken: $nextToken
-    sortDirection: $sortDirection
-  ) {
+  listMessages(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
       content
       conversationId
       createdAt
-      messageId
+      id
       owner
       updatedAt
       userId

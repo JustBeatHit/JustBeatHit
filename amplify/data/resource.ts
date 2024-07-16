@@ -32,8 +32,8 @@ const schema = a.schema({
   }),
 
   Player: a.model({
-    profileId: a.string().required(),
-    partyId: a.id().required(),
+    profileId: a.id(),
+    partyId: a.id(),
     user: a.belongsTo("UserProfile", "profileId"),
     party: a.belongsTo("Party", "partyId"),
     charPos: a.integer(),
@@ -48,8 +48,8 @@ const schema = a.schema({
   }),
 
   ConversationUser: a.model({
-    userId: a.string().required(),
-    conversationId: a.id().required(),
+    userId: a.string(),
+    conversationId: a.id(),
     user: a.belongsTo("UserProfile", "userId"),
     conversation: a.belongsTo("Conversation", "conversationId"),
     messages: a.hasMany("Message", "userId")

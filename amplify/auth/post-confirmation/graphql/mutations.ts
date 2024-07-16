@@ -144,7 +144,7 @@ export const createMessage = /* GraphQL */ `mutation CreateMessage(
     }
     conversationId
     createdAt
-    messageId
+    id
     owner
     sender {
       conversationId
@@ -180,13 +180,13 @@ export const createParty = /* GraphQL */ `mutation CreateParty(
     createdAt
     id
     owner
-    scores
-    status
-    updatedAt
-    users {
+    players {
       nextToken
       __typename
     }
+    scores
+    status
+    updatedAt
     __typename
   }
 }
@@ -238,7 +238,11 @@ export const createUserProfile = /* GraphQL */ `mutation CreateUserProfile(
   $input: CreateUserProfileInput!
 ) {
   createUserProfile(condition: $condition, input: $input) {
-    conversations {
+    Players {
+      nextToken
+      __typename
+    }
+    conversationUsers {
       nextToken
       __typename
     }
@@ -248,10 +252,6 @@ export const createUserProfile = /* GraphQL */ `mutation CreateUserProfile(
       __typename
     }
     outgoingFriendRequests {
-      nextToken
-      __typename
-    }
-    partys {
       nextToken
       __typename
     }
@@ -397,7 +397,7 @@ export const deleteMessage = /* GraphQL */ `mutation DeleteMessage(
     }
     conversationId
     createdAt
-    messageId
+    id
     owner
     sender {
       conversationId
@@ -433,13 +433,13 @@ export const deleteParty = /* GraphQL */ `mutation DeleteParty(
     createdAt
     id
     owner
-    scores
-    status
-    updatedAt
-    users {
+    players {
       nextToken
       __typename
     }
+    scores
+    status
+    updatedAt
     __typename
   }
 }
@@ -491,7 +491,11 @@ export const deleteUserProfile = /* GraphQL */ `mutation DeleteUserProfile(
   $input: DeleteUserProfileInput!
 ) {
   deleteUserProfile(condition: $condition, input: $input) {
-    conversations {
+    Players {
+      nextToken
+      __typename
+    }
+    conversationUsers {
       nextToken
       __typename
     }
@@ -501,10 +505,6 @@ export const deleteUserProfile = /* GraphQL */ `mutation DeleteUserProfile(
       __typename
     }
     outgoingFriendRequests {
-      nextToken
-      __typename
-    }
-    partys {
       nextToken
       __typename
     }
@@ -650,7 +650,7 @@ export const updateMessage = /* GraphQL */ `mutation UpdateMessage(
     }
     conversationId
     createdAt
-    messageId
+    id
     owner
     sender {
       conversationId
@@ -686,13 +686,13 @@ export const updateParty = /* GraphQL */ `mutation UpdateParty(
     createdAt
     id
     owner
-    scores
-    status
-    updatedAt
-    users {
+    players {
       nextToken
       __typename
     }
+    scores
+    status
+    updatedAt
     __typename
   }
 }
@@ -744,7 +744,11 @@ export const updateUserProfile = /* GraphQL */ `mutation UpdateUserProfile(
   $input: UpdateUserProfileInput!
 ) {
   updateUserProfile(condition: $condition, input: $input) {
-    conversations {
+    Players {
+      nextToken
+      __typename
+    }
+    conversationUsers {
       nextToken
       __typename
     }
@@ -754,10 +758,6 @@ export const updateUserProfile = /* GraphQL */ `mutation UpdateUserProfile(
       __typename
     }
     outgoingFriendRequests {
-      nextToken
-      __typename
-    }
-    partys {
       nextToken
       __typename
     }

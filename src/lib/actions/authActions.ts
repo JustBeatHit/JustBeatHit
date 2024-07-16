@@ -28,25 +28,19 @@ export async function authSignUp(
 }
 
 export async function authSendVerificationCode(
-    prevState: { message: string; erroMessage: string},
+    prevState: { message?: string; erroMessage?: string} | undefined,
     formData: FormData,
 ) {
     let currentState;
     try {
-        /**
-         * @todo: validate input
-         */
-
         await resendSignUpCode({
             username: String(formData.get("email")),
         })
         currentState = {
-            ...prevState,
-            message: "Code send successfully"
+            message: "Code send successfully",
         }
     } catch (error) {
         currentState = {
-            ...prevState,
             errorMessage: getErrorMessage(error)
         }
     }

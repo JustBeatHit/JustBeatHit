@@ -1,5 +1,5 @@
 'use client'
-import { authSignIn } from "@/lib/authActions"
+import { authSignIn } from "@/lib/actions/authActions"
 import { useFormState, useFormStatus } from "react-dom"
 
 export default function Page() {
