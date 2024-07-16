@@ -70,3 +70,33 @@ export async function authConfirmSignUp(
     }
     redirect("/auth/login")
 }
+
+export async function authSignIn(
+    prevState: string | undefined,
+    formData: FormData
+){
+    try {
+        const { isSignedIn, nextStep } = await signIn({
+            username: String(formData.get("email")),
+            password: String(formData.get("password"))
+        })
+        if(nextStep.signInStep === "CONFIRM_SIGN_UP"){
+            await resendSignUpCode({
+                username: String(formData.get("email"))
+            })
+            redirect("/auth/confirm")
+        }
+    } catch (error) {
+        return getErrorMessage(error)
+    }
+    redirect("/game")
+}
+
+export async function authSignOut() {
+    try {
+        await signOut()
+    } catch (error) {
+        console.log(getErrorMessage(error))
+    }
+    redirect("/auth/login")
+}
