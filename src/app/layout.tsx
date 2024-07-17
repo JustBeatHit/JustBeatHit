@@ -1,5 +1,5 @@
 import '../stylesheets/base.scss';
-
+import Navbar from './components/Navbar';
 export const metadata = {
   title: 'Just Beat Hit',
   description: 'Jeux musicaux en ligne',
@@ -12,7 +12,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      
+      <body>
+      <Navbar />
+        {children}
+        </body>
     </html>
   )
 }

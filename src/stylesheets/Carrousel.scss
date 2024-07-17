@@ -1,0 +1,37 @@
+.carousel-container {
+  width: 275px;
+  margin: 20px auto;
+
+  .carousel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+
+    .carousel-arrows {
+      .arrow {
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: #fff;
+        cursor: pointer;
+        padding: 0 10px;
+      }
+    }
+
+    .carousel-title {
+      h2 {
+        margin: 0;
+        font-size: 20px;
+      }
+    }
+  }
+
+  .carousel-content {
+    .slide {
+      width: 100%;
+      height: 150px;
+      border-radius: 0.5rem;
+    }
+  }
+}

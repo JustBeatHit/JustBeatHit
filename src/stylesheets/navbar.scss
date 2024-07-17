@@ -1,0 +1,33 @@
+.navbar{
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+    width: calc(100% - 40px);
+    padding: 10px 20px;
+
+    .LogoMini{
+        width: 40px;
+    }
+    ul{
+        display: inline-flex;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        width: 33%;
+        &:nth-of-type(2){
+            justify-content: center;
+        }
+        &:last-of-type{
+            justify-content: flex-end;
+            align-items: center;
+        }
+        li{
+            margin: 0 10px;
+            cursor: pointer;
+
+            span{
+                text-decoration: underline;
+            }
+        }
+    }
+}
