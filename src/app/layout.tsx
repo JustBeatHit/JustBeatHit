@@ -1,4 +1,5 @@
-import '../stylesheets/base.scss';
+import '@/stylesheets/base.scss';
+import ConfigureAmplifyClientSide from "./components/ConfigureAmplify";
 
 export const metadata = {
   title: 'Just Beat Hit',
@@ -12,7 +13,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <ConfigureAmplifyClientSide />
+        {children}
+      </body>
     </html>
   )
 }
