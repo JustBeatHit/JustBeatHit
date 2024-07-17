@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import ReactAudioPlayer from 'react-audio-player';
-import { parseLRC, LyricLine } from '../../../utils/LrcParser';
-import { loadLRCFile } from '../../../utils/LrcLoader';
-import '../../../stylesheets/karakaku.scss';
+import { parseLRC, LyricLine } from '@/utils/LrcParser';
+import { loadLRCFile } from '@/utils/LrcLoader';
+import '@/stylesheets/karakaku.scss';
 import Link from 'next/link';
 
 // Normalise les chaînes et supprime les accents

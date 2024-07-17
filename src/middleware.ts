@@ -13,9 +13,9 @@ export async function middleware(request: NextRequest) {
         }
         return response;
     }
-    else if(user){
-        return NextResponse.redirect(new URL("/game", request.nextUrl))
-    }
+    // else if(user){
+    //     return NextResponse.redirect(new URL("/game", request.nextUrl))
+    // }
 }
 
 export const config = {

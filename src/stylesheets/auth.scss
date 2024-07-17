@@ -1,0 +1,84 @@
+@import './mixins.scss';
+
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    font-size: 1rem;
+    color: #fffef8;
+    font-weight: 400;
+}
+
+.hidden {
+    display: none;
+}
+
+form {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    font-weight: 400;
+}
+
+input {
+    width: 230px;
+    padding: 8px;
+    border-radius: 8px;
+    border: 2px solid #2d2d2d;
+    margin-bottom: 4px;
+    background-color: transparent;
+    font-family: 'Goia';
+    transition: box-shadow .5s;
+}
+
+input:focus-visible {
+    // outline: 2px solid sandybrown;
+    outline: none;
+    box-shadow: 0 0 10px rgba(153, 96, 244, 0.2);
+}
+
+label {
+    margin-bottom: 8px;
+    margin-top: 12px;
+    color: #fffef8;
+}
+
+button {
+    font-family: 'Goia';
+    border: none;
+    border-radius: 8px;
+    margin-top: 16px;
+    padding: 8px;
+    background-color: sandybrown;
+    color: #fffef8;
+    text-transform: uppercase;
+    letter-spacing: 0.5;
+    transition: background-color, color 0.3s;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: rgb(223, 151, 88);
+    color: #fffef8;
+}
+
+.secondary{
+    margin-top: 8px;
+    background-color: #fffef8;
+    color: sandybrown;
+}
+
+.secondary:hover {
+    box-shadow: 0 0 10px rgba(244, 164, 96, .7);
+    background-color: #fffef8;
+    color: sandybrown;
+}
+
+h3{
+    color: sandybrown;
+    font-size: 2rem;
+    font-weight: 400;
+}

@@ -7,14 +7,14 @@ export default function Page() {
 
     return (
         <div>
+            <h3>Login</h3>
             <form action={dispatch}>
-                <label htmlFor="email">Username :</label>
-                <input className=' text-black' type="text" id="email" name="email" />
+                <label htmlFor="email">E-mail :</label>
+                <input className=' text-black' type="text" id="email" name="email" placeholder="exemple@email.com"/>
                 <label htmlFor="password">Password :</label>
                 <input className=' text-black' type="password" id="password" name="password" />
-                <input type="submit" />
+                <LoginButton/>
             </form>
-            <LoginButton/>
         </div>
       )
 }
