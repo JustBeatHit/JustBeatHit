@@ -1,10 +1,7 @@
-'use client';
-
 import Link from "next/link";
-import React from "react";
 import "../stylesheets/home.scss";
 
-const HomePage = () => {
+const Page = () => {
   return (
     <div>
       <h1>Just Beat Hit</h1>
@@ -13,4 +10,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default Page;
