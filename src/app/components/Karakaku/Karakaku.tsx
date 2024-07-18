@@ -100,6 +100,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         const audioEl = audioPlayerRef.current?.audioEl.current;
         if (audioEl) {
             const currentTime = audioEl.currentTime;
+            const duration = audioEl.duration;
             const nextLyricTime = lyrics[currentLyricIndex + 1]?.time;
 
             if (nextLyricTime && currentTime >= nextLyricTime - 0.05) {
@@ -119,6 +120,11 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
                     setIsValidated(false);
                     setHasErrors(false);
                 }
+            }
+
+            if (currentTime >= duration - 0.1) {
+                setIsStarted(false);
+                setIsGameOver(true);
             }
         }
     };
@@ -186,10 +192,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
             }
 
             if (currentLyricIndex === lyrics.length - 1) {
-                audioPlayerRef.current?.audioEl.current?.pause();
-                setIsStarted(false);
                 setEndTime(Date.now());
-                setIsGameOver(true);
             } else if (audioPlayerRef.current?.audioEl.current && audioPlayerRef.current.audioEl.current.paused) {
                 audioPlayerRef.current.audioEl.current.play();
             }
@@ -229,14 +232,6 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         });
     };
 
-    useEffect(() => {
-        if (currentLyricIndex === lyrics.length - 1 && isValidated) {
-            audioPlayerRef.current?.audioEl.current?.pause();
-            setIsStarted(false);
-            setIsGameOver(true);
-        }
-    }, [currentLyricIndex, isValidated, lyrics.length]);
-
     const calculateWPM = (): number => {
         if (!startTime || !endTime || endTime <= startTime) {
             return 0;
@@ -275,7 +270,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
     };
 
     const renderLyrics = () => {
-        if (currentLyricIndex === lyrics.length - 1 && isValidated) {
+        if ((currentLyricIndex === lyrics.length - 1 && isValidated) && isGameOver) {
             return (
                 <div className="final-score">
                     <p>Score final: {score}</p>
