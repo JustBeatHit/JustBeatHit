@@ -20,10 +20,11 @@ form {
     justify-content: center;
     flex-direction: column;
     font-weight: 400;
+    margin-bottom: 24px;
+    width: auto;
 }
 
 input {
-    width: 230px;
     padding: 8px;
     border-radius: 8px;
     border: 2px solid #2d2d2d;
@@ -81,4 +82,19 @@ h3{
     color: sandybrown;
     font-size: 2rem;
     font-weight: 400;
+}
+
+.link{
+    color: sandybrown;
+    font-weight: 400;
+    width: 100%;
+    transition: color 0.3s;
+}
+
+.link:hover{
+    color: #fffef8;
+}
+
+.form-container{
+    max-width: 230px;
 }

@@ -1,4 +1,5 @@
-import '@/stylesheets/base.scss';
+import '../stylesheets/base.scss';
+import Navbar from './components/Navbar';
 import ConfigureAmplifyClientSide from "./components/ConfigureAmplify";
 
 export const metadata = {
@@ -16,7 +17,7 @@ export default function RootLayout({
       <body>
         <ConfigureAmplifyClientSide />
         {children}
-      </body>
+        </body>
     </html>
   )
 }
