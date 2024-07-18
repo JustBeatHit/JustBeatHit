@@ -40,6 +40,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
     const [incorrectCharacters, setIncorrectCharacters] = useState<number>(0);
     const [totalCharacters, setTotalCharacters] = useState<number>(0);
     const [isGameOver, setIsGameOver] = useState<boolean>(false);
+    let [isMusicFinished, setIsMusicFinished] = useState<boolean>(false);
 
     useEffect(() => {
         const loadLyrics = async () => {
@@ -121,11 +122,13 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
                     setHasErrors(false);
                 }
             }
-
-            if (currentTime >= duration - 0.1) {
-                setIsStarted(false);
-                setIsGameOver(true);
-            }
+            const handleAudioEnded = () => {
+                setIsMusicFinished(true);
+            };
+            audioEl.addEventListener('ended', handleAudioEnded);
+            return () => {
+                audioEl.removeEventListener('ended', handleAudioEnded);
+            };
         }
     };
 
@@ -232,6 +235,13 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         });
     };
 
+    useEffect(() => {
+        if (currentLyricIndex === lyrics.length - 1 && (isValidated && isMusicFinished)) {
+            setIsStarted(false);
+            setIsGameOver(true);
+        }
+    }, [currentLyricIndex, isValidated, lyrics.length, isMusicFinished]);
+
     const calculateWPM = (): number => {
         if (!startTime || !endTime || endTime <= startTime) {
             return 0;
@@ -258,6 +268,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         setLockedChars('');
         setIsStarted(false);
         setIsGameOver(false);
+        setIsMusicFinished(false);
         setScore(0);
         setLastScoreChange(0);
         setHasErrors(false);
