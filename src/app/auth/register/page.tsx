@@ -12,6 +12,8 @@ export default function Page() {
       <form action={dispatch}>
         <label htmlFor="email">Email:</label>
         <input type="text" id="email" name="email" placeholder="exemple@email.com"/>
+        <label htmlFor="username">Username:</label>
+        <input type="text" id="username" name="username" placeholder="JohnDoe01"/>
         <label htmlFor="password">Password:</label>
         <input type="password" id="password" name="password" placeholder="Create password"/>
         {/* <label htmlFor="repeatPassword">Repeat Password:</label> */}

@@ -1,3 +1,4 @@
+// Client actions
 import { getErrorMessage } from "@/utils/error-message"
 import { signUp, confirmSignUp, signIn, signOut, resendSignUpCode, autoSignIn } from "aws-amplify/auth"
 import { redirect } from "next/navigation"
@@ -10,18 +11,19 @@ export async function authSignUp(
         /**
          * @todo: validate input
          */
-
         const { isSignUpComplete, userId, nextStep } = await signUp({
             username: String(formData.get("email")),
             password: String(formData.get("password")),
             options: {
                 userAttributes: {
                     preferred_username: String(formData.get("username")),
+                    email: String(formData.get("email")),
                 },
                 autoSignIn: true
             }
         })
     } catch (error) {
+        console.error(error)
         return getErrorMessage(error)
     }
     redirect(`/auth/confirm?email=${String(formData.get("email"))}`)

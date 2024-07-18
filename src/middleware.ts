@@ -5,7 +5,7 @@ export async function middleware(request: NextRequest) {
     const response = NextResponse.next();
     const user = await AuthGetCurrentUserServer()
     
-    const isOnGame = request.nextUrl.pathname.startsWith("/karakaku")
+    const isOnGame = !request.nextUrl.pathname.startsWith("/auth")
 
     if (isOnGame) {
         if(!user){

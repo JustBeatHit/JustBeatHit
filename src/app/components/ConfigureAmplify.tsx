@@ -9,16 +9,16 @@ import { CONNECTION_STATE_CHANGE, ConnectionState } from "aws-amplify/api";
 Amplify.configure(outputs, { ssr: true });
 
 export default function ConfigureAmplifyClientSide() {
-  useEffect(() => {
-    Hub.listen('api', (data: any) => {
-        console.log(data);
-        const { payload } = data;
-        if (payload.event === CONNECTION_STATE_CHANGE) {
-            const connectionState = payload.data.connectionState as ConnectionState;
-            console.log(connectionState);
-        }
-    });
-}, [])
+//   useEffect(() => {
+//     Hub.listen('api', (data: any) => {
+//         console.log(data);
+//         const { payload } = data;
+//         if (payload.event === CONNECTION_STATE_CHANGE) {
+//             const connectionState = payload.data.connectionState as ConnectionState;
+//             console.log(connectionState);
+//         }
+//     });
+// }, [])
 
   return null;
 }

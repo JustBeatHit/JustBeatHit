@@ -38,7 +38,7 @@ const schema = a.schema({
     party: a.belongsTo("Party", "partyId"),
     charPos: a.integer(),
     score: a.integer().required().default(0),
-  }),
+  }),//.authorization((allow)=>[allow.owner().to(["read","create","delete"])])
 
   Conversation: a.model({
     partyId: a.id(),
@@ -74,7 +74,7 @@ const schema = a.schema({
     .handler(a.handler.function(addUserToGroup))
     .returns(a.json())
 
-}).authorization((allow) => [allow.authenticated().to(["read"]),allow.owner().to(["create"]),allow.resource(postConfirmation)])
+}).authorization((allow) => [allow.authenticated().to(["read"]),allow.owner().to(["read","create","delete"]),allow.resource(postConfirmation)])
 
 export type Schema = ClientSchema<typeof schema>
 

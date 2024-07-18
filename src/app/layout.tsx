@@ -1,5 +1,5 @@
 import '@/stylesheets/base.scss';
-import ConfigureAmplifyClientSide from "./components/ConfigureAmplify";
+import ConfigureAmplifyClientSide from "@/app/components/ConfigureAmplify";
 
 export const metadata = {
   title: 'Just Beat Hit',

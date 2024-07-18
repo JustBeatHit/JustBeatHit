@@ -1,7 +1,7 @@
 import { generateClient } from "aws-amplify/data";
 import { fetchAuthSession, fetchUserAttributes, getCurrentUser } from "aws-amplify/auth";
 import { useEffect, useState } from "react";
-import { Schema } from "@/amplify/data/resource";
+import { Schema } from "~/amplify/data/resource";
 
 const client = generateClient<Schema>()
 
