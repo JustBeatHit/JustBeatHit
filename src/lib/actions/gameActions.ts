@@ -34,7 +34,7 @@ export async function createPartyHandler(
 export async function joinPartyHandler(
     prevState: { errorMessage?: string } | undefined,
 ): Promise<{ errorMessage?: string } | undefined> {
-    let partyId
+    let partyId = undefined
     try {
         const { userId } = await getProfile()
         if (!userId) {
@@ -46,7 +46,14 @@ export async function joinPartyHandler(
             throw errors[0]
         }
 
-        partyId = partys.find((party) => hasAvailableSpace(party.id))?.id
+        for (const party of partys) {
+            const has = await hasAvailableSpace(party.id);
+            console.info('has', has);
+            if (has) {
+                partyId = party.id;
+                break;
+            }
+        }
 
         if (!partyId) {
             partyId = await createParty()
@@ -55,7 +62,7 @@ export async function joinPartyHandler(
             const conversationId = await createConversation(partyId)
             console.info("conversationId : ", conversationId)
             await createConversationUser(conversationId, partyId)
-            revalidatePath('/game')
+            revalidatePath('/games')
         }
     } catch (error) {
         return { errorMessage: getErrorMessage(error) }

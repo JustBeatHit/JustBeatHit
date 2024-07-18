@@ -8,6 +8,7 @@ export async function middleware(request: NextRequest) {
     const isOnGame = !request.nextUrl.pathname.startsWith("/auth")
 
     if (isOnGame) {
+        console.info(user)
         if(!user){
             return NextResponse.redirect(new URL("/auth/login", request.nextUrl));
         }

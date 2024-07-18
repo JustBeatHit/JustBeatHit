@@ -25,13 +25,13 @@ export async function hasAvailableSpace(partyId: string) {
     try {
         console.info('joinParty')
         const players = await getPlayers(partyId)
-        if (players.length < 5) {
-            // const { data: player, errors } = await cookiesClient.models.Player.create({ partyId, score: 0, profileId: userId }) as {data: Schema["Player"]["type"] | null, errors: any}
+        if (players.length < 2) {
             return true
         }
     } catch (error) {
         throw error
     }
+    return false
 }
 
 export async function createParty() {
