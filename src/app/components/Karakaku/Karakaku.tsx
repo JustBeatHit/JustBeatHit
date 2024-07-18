@@ -7,9 +7,13 @@ import { loadLRCFile } from '../../../utils/LrcLoader';
 import '../../../stylesheets/karakaku.scss';
 import Link from 'next/link';
 
-// Normalise les chaînes et supprime les accents
+// Normalise les chaînes et remplace les "oe" par "œ" et supprime les accents
 const normalizeString = (str: string): string => {
-    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    return str
+        .replace(/oe/g, 'œ')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
 };
 
 // Enlève les segments entre parenthèses dans les lignes de paroles
@@ -20,6 +24,7 @@ const removeParentheses = (str: string): string => {
 interface KarakakuProps {
     songName: string;
 }
+
 const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
     const [lyrics, setLyrics] = useState<LyricLine[]>([]);
     const [currentLyricIndex, setCurrentLyricIndex] = useState<number>(0);
@@ -133,12 +138,16 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const inputValue = e.target.value;
+        let inputValue = e.target.value;
 
         if (!lyrics[currentLyricIndex]) return;
 
         const currentLyric = lyrics[currentLyricIndex].text;
         const autoCompleteChars = [' ', '.', ',', '!', '?', ';', ':', '-', '(', ')', '"', "'"];
+
+        // Remplacer 'oe' par 'œ'
+        inputValue = inputValue.replace(/oe/g, 'œ');
+
         let userInputUpdated = inputValue;
 
         if (inputValue.length < userInput.length) {
@@ -157,6 +166,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
 
         const correctPortion = currentLyric.slice(0, userInputUpdated.length);
         const userTypedPortion = userInputUpdated.slice(0, correctPortion.length);
+
         if (normalizeString(userTypedPortion) === normalizeString(correctPortion)) {
             setLockedChars(userInputUpdated);
             const points = 100;
