@@ -1,6 +1,3 @@
-'use client';
-
-import React from "react";
 import "../stylesheets/home.scss";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,11 +8,13 @@ import QuestionSvg from "../../public/assets/img/icon/question-mark.svg"
 import SoonLogo from "../../public/assets/img/SoonLogo.svg"
 import Carousel from "./components/Carrousel";
 
-const HomePage = () => {
+
+const Page = () => {
   const carouselImages = [
     "/assets/img/Boat.jpg",
     "/assets/img/Carrousel1.png",
   ];
+
   return (
     <div className="home">
       <div className="header-homepage">
@@ -98,4 +97,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default Page;
