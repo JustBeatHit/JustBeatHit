@@ -7,9 +7,13 @@ import { loadLRCFile } from '@/utils/LrcLoader';
 import '@/stylesheets/karakaku.scss';
 import Link from 'next/link';
 
-// Normalise les chaînes et supprime les accents
+// Normalise les chaînes et remplace les "oe" par "œ" et supprime les accents
 const normalizeString = (str: string): string => {
-    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    return str
+        .replace(/oe/g, 'œ')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
 };
 
 // Enlève les segments entre parenthèses dans les lignes de paroles
@@ -20,6 +24,7 @@ const removeParentheses = (str: string): string => {
 interface KarakakuProps {
     songName: string;
 }
+
 const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
     const [lyrics, setLyrics] = useState<LyricLine[]>([]);
     const [currentLyricIndex, setCurrentLyricIndex] = useState<number>(0);
@@ -40,6 +45,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
     const [incorrectCharacters, setIncorrectCharacters] = useState<number>(0);
     const [totalCharacters, setTotalCharacters] = useState<number>(0);
     const [isGameOver, setIsGameOver] = useState<boolean>(false);
+    let [isMusicFinished, setIsMusicFinished] = useState<boolean>(false);
 
     useEffect(() => {
         const loadLyrics = async () => {
@@ -100,6 +106,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         const audioEl = audioPlayerRef.current?.audioEl.current;
         if (audioEl) {
             const currentTime = audioEl.currentTime;
+            const duration = audioEl.duration;
             const nextLyricTime = lyrics[currentLyricIndex + 1]?.time;
 
             if (nextLyricTime && currentTime >= nextLyricTime - 0.05) {
@@ -120,16 +127,27 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
                     setHasErrors(false);
                 }
             }
+            const handleAudioEnded = () => {
+                setIsMusicFinished(true);
+            };
+            audioEl.addEventListener('ended', handleAudioEnded);
+            return () => {
+                audioEl.removeEventListener('ended', handleAudioEnded);
+            };
         }
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const inputValue = e.target.value;
+        let inputValue = e.target.value;
 
         if (!lyrics[currentLyricIndex]) return;
 
         const currentLyric = lyrics[currentLyricIndex].text;
         const autoCompleteChars = [' ', '.', ',', '!', '?', ';', ':', '-', '(', ')', '"', "'"];
+
+        // Remplacer 'oe' par 'œ'
+        inputValue = inputValue.replace(/oe/g, 'œ');
+
         let userInputUpdated = inputValue;
 
         if (inputValue.length < userInput.length) {
@@ -148,6 +166,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
 
         const correctPortion = currentLyric.slice(0, userInputUpdated.length);
         const userTypedPortion = userInputUpdated.slice(0, correctPortion.length);
+
         if (normalizeString(userTypedPortion) === normalizeString(correctPortion)) {
             setLockedChars(userInputUpdated);
             const points = 100;
@@ -186,10 +205,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
             }
 
             if (currentLyricIndex === lyrics.length - 1) {
-                audioPlayerRef.current?.audioEl.current?.pause();
-                setIsStarted(false);
                 setEndTime(Date.now());
-                setIsGameOver(true);
             } else if (audioPlayerRef.current?.audioEl.current && audioPlayerRef.current.audioEl.current.paused) {
                 audioPlayerRef.current.audioEl.current.play();
             }
@@ -230,12 +246,11 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
     };
 
     useEffect(() => {
-        if (currentLyricIndex === lyrics.length - 1 && isValidated) {
-            audioPlayerRef.current?.audioEl.current?.pause();
+        if (currentLyricIndex === lyrics.length - 1 && (isValidated && isMusicFinished)) {
             setIsStarted(false);
             setIsGameOver(true);
         }
-    }, [currentLyricIndex, isValidated, lyrics.length]);
+    }, [currentLyricIndex, isValidated, lyrics.length, isMusicFinished]);
 
     const calculateWPM = (): number => {
         if (!startTime || !endTime || endTime <= startTime) {
@@ -263,6 +278,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         setLockedChars('');
         setIsStarted(false);
         setIsGameOver(false);
+        setIsMusicFinished(false);
         setScore(0);
         setLastScoreChange(0);
         setHasErrors(false);
@@ -275,7 +291,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
     };
 
     const renderLyrics = () => {
-        if (currentLyricIndex === lyrics.length - 1 && isValidated) {
+        if ((currentLyricIndex === lyrics.length - 1 && isValidated) && isGameOver) {
             return (
                 <div className="final-score">
                     <p>Score final: {score}</p>
