@@ -1,4 +1,3 @@
-import React from 'react';
 import Link from 'next/link';
 import '../../stylesheets/navbar.scss';
 import LogoMini from "../../../public/assets/img/LogoMini.svg"

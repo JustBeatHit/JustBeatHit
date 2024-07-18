@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import '../../stylesheets/Carrousel.scss';
+"use client"
+import { useState } from "react";
+import "../../stylesheets/Carrousel.scss";
 
 const Carousel = ({ images }: { images: string[] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);

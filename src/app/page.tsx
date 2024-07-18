@@ -7,6 +7,7 @@ import MusicSvg from "../../public/assets/img/icon/music-1.svg"
 import QuestionSvg from "../../public/assets/img/icon/question-mark.svg"
 import SoonLogo from "../../public/assets/img/SoonLogo.svg"
 import Carousel from "./components/Carrousel";
+import Navbar from "./components/Navbar";
 
 
 const Page = () => {
@@ -17,6 +18,7 @@ const Page = () => {
 
   return (
     <div className="home">
+      <Navbar />
       <div className="header-homepage">
         <div className="header-homepage-text">
           <ul>
@@ -30,7 +32,7 @@ const Page = () => {
           <ul>
             <li>accès rapide ·</li>
             <li>
-              <Link href="">
+              <Link href="/karakaku">
                 
                 <button className="start-button">
                 <Image
@@ -65,7 +67,7 @@ const Page = () => {
               alt="Soon Logo"
               className="ComingSoon"
               />
-              <Link href="/karakaku">
+              <Link href="/">
                 <button className="start-button">
                 <Image
                   priority

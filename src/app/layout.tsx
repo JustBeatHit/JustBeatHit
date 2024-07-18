@@ -16,7 +16,6 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ConfigureAmplifyClientSide />
-        <Navbar />
         {children}
         </body>
     </html>
