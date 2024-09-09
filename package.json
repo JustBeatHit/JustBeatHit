@@ -43,6 +43,7 @@
     "@aws-amplify/backend-cli": "^1.1.1",
     "@types/aws-lambda": "^8.10.141",
     "@types/react": "18.3.3",
+    "@types/react-dom": "^18.3.0",
     "aws-cdk": "^2.149.0",
     "aws-cdk-lib": "^2.149.0",
     "constructs": "^10.3.0",
