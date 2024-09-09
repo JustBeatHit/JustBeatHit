@@ -7,15 +7,15 @@ export async function middleware(request: NextRequest) {
     
     const isOnGame = request.nextUrl.pathname.startsWith("/karakaku")
 
-    if (isOnGame) {
-        if(!user){
-            return NextResponse.redirect(new URL("/auth/login", request.nextUrl));
-        }
-        return response;
-    }
-    else if(user){
-        return NextResponse.redirect(new URL("/karakaku", request.nextUrl))
-    }
+    // if (isOnGame) {
+    //     if(!user){
+    //         return NextResponse.redirect(new URL("/auth/login", request.nextUrl));
+    //     }
+    //     return response;
+    // }
+    // else if(user){
+    //     return NextResponse.redirect(new URL("/karakaku", request.nextUrl))
+    // }
 }
 
 export const config = {
