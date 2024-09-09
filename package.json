@@ -20,7 +20,8 @@
     "web-vitals": "^4.2.1"
   },
   "scripts": {
-    "dev": "concurrently \"npm run next-dev\" \"npx ampx sandbox\"",
+    "dev": "npm run next-dev",
+    "server": "npx ampx sandbox",
     "next-dev": "next dev",
     "build": "next build",
     "start": "next start"
