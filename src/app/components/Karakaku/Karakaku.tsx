@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useLyrics } from './utils/useLyrics';
 import {useCaretPosition} from "./utils/useCaretPosition";
 import { calculateWPM, calculateAccuracy, calculateScore, calculatePauseCount } from './utils/scoreUtils';
+import {handleTimeUpdate} from "./utils/timeUpdateUtils";
 
 // Normalise les chaînes et remplace les "oe" par "œ" et supprime les accents
 const normalizeString = (str: string): string => {
@@ -62,40 +63,24 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         charRefs,
         caretRef
     });
-    const handleTimeUpdate = () => {
-        const audioEl = audioPlayerRef.current?.audioEl.current;
-        if (audioEl) {
-            const currentTime = audioEl.currentTime;
-            const nextLyricTime = lyrics[currentLyricIndex + 1]?.time;
-
-            if (nextLyricTime && currentTime >= nextLyricTime - 0.05) {
-                if (!isValidated) {
-                    audioEl.pause();
-                    const points = -500;
-                    setPauseCount(prevCount => calculatePauseCount(prevCount));
-                    setScore(prevScore => {
-                        const newScore = Math.max(prevScore + points, 0);
-                        setLastScoreChange(points);
-                        return newScore;
-                    });
-                } else {
-                    setUserInput('');
-                    setLockedChars('');
-                    setCurrentLyricIndex(currentLyricIndex + 1);
-                    setIsValidated(false);
-                    setHasErrors(false);
-                }
-            }
-            const handleAudioEnded = () => {
-                setIsMusicFinished(true);
-            };
-            audioEl.addEventListener('ended', handleAudioEnded);
-            return () => {
-                audioEl.removeEventListener('ended', handleAudioEnded);
-            };
-        }
+    const handleTimeUpdateWrapper = () => {
+        handleTimeUpdate(
+            audioPlayerRef,
+            lyrics,
+            currentLyricIndex,
+            isValidated,
+            setUserInput,
+            setLockedChars,
+            setCurrentLyricIndex,
+            setIsValidated,
+            setHasErrors,
+            setPauseCount,
+            calculatePauseCount,
+            setScore,
+            setLastScoreChange,
+            setIsMusicFinished
+        );
     };
-
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         let inputValue = e.target.value;
 
@@ -283,7 +268,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
                     <ReactAudioPlayer
                         src={`/songs/${songName}/song.mp3`}
                         controls
-                        onListen={handleTimeUpdate}
+                        onListen={handleTimeUpdateWrapper}
                         ref={audioPlayerRef}
                         listenInterval={100}
                     />

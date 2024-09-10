@@ -26,6 +26,5 @@ export const calculateScore = (prevScore: number, points: number): number => {
 };
 
 export const calculatePauseCount = (pauseCount: number): number => {
-    console.log('pauseCount', pauseCount);
     return pauseCount + 1;
 };
