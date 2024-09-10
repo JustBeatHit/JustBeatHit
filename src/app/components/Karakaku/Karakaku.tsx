@@ -107,6 +107,100 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
     updateCaretPosition();
   }, [userInput, currentLyricIndex, lyrics]);
 
+  const handleAudioPause = () => {
+    let timeLeft = 10; // 10 seconds
+    setCountdown(timeLeft);
+  
+    // Clear any existing intervals before starting a new one
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+    }
+  
+    // Set interval to update countdown every second
+    const interval = setInterval(() => {
+      timeLeft -= 1;
+      setCountdown(timeLeft);
+  
+      if (timeLeft <= 0) {
+        clearInterval(interval); // Clear the interval when countdown ends
+      }
+    }, 1000);
+  
+    setCountdownInterval(interval);
+  
+    // Set a timeout to skip to the next lyric after 10 seconds
+    const timeout = setTimeout(() => {
+      clearInterval(interval); // Clear the interval
+  
+      if (currentLyricIndex < lyrics.length - 1) {
+        // Skip to the next lyric if it's not the last one
+        setCurrentLyricIndex((prevIndex) => prevIndex + 1);
+        setUserInput("");
+        setIsValidated(false);
+        setHasErrors(false);
+  
+        // Continue playing the audio after skipping the line
+        if (audioPlayerRef.current?.audioEl.current?.paused) {
+          audioPlayerRef.current.audioEl.current.play();
+        }
+      } else {
+        // Render the last lyric first, then trigger game over
+        setCurrentLyricIndex((prevIndex) => prevIndex + 1); // This will render the last line
+        setTimeout(() => {
+          setIsGameOver(true); // End the game after rendering the last line
+          setCountdown(null);
+        }, 1000); // Small delay to ensure the last line is displayed before ending the game
+      }
+    }, 10000); // 10 seconds
+  
+    setPauseTimeout(timeout);
+  };
+  
+  
+  
+  const handleAudioPlay = () => {
+    if (pauseTimeout) {
+      clearTimeout(pauseTimeout);
+      setPauseTimeout(null);
+    }
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+      setCountdownInterval(null);
+    }
+    setCountdown(null); 
+  };
+  const handleFinalLyricTimeout = () => {
+    const timeout = setTimeout(() => {
+      setIsGameOver(true); 
+      setCountdown(null); 
+    }, 10000); 
+  
+    setPauseTimeout(timeout);
+  };
+  
+  useEffect(() => {
+    const audioEl = audioPlayerRef.current?.audioEl.current;
+  
+    const handleAudioEnded = () => {
+      if (currentLyricIndex === lyrics.length - 1 && !isGameOver) {
+        handleFinalLyricTimeout();
+      }
+    };
+  
+    if (audioEl) {
+      audioEl.addEventListener("pause", handleAudioPause);
+      audioEl.addEventListener("play", handleAudioPlay);
+      audioEl.addEventListener("ended", handleAudioEnded); 
+  
+      return () => {
+        audioEl.removeEventListener("pause", handleAudioPause);
+        audioEl.removeEventListener("play", handleAudioPlay);
+        audioEl.removeEventListener("ended", handleAudioEnded); 
+      };
+    }
+  }, [audioPlayerRef, pauseTimeout, countdownInterval, currentLyricIndex, lyrics.length]);
+  
+
   const handleTimeUpdate = () => {
     const audioEl = audioPlayerRef.current?.audioEl.current;
     if (audioEl) {
@@ -141,64 +235,12 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
       };
     }
   };
-  const handleAudioPause = () => {
-    let timeLeft = 10; // 10 seconds
-    setCountdown(timeLeft);
-
-    // Clear any existing intervals before starting a new one
-    if (countdownInterval) {
-      clearInterval(countdownInterval);
-    }
-
-    // Set interval to update countdown every second
-    const interval = setInterval(() => {
-      timeLeft -= 1;
-      setCountdown(timeLeft);
-
-      if (timeLeft <= 0) {
-        clearInterval(interval); // Clear the interval when countdown ends
-      }
-    }, 1000);
-
-    setCountdownInterval(interval);
-
-    // Set a timeout to skip to the next lyric after 10 seconds
-    const timeout = setTimeout(() => {
-      clearInterval(interval); // Clear the interval
-
-      setCurrentLyricIndex((prevIndex) => prevIndex + 1);
-      setUserInput("");
-      setIsValidated(false);
-      setHasErrors(false);
-
-      // Continue playing the audio after skipping the line
-      if (audioPlayerRef.current?.audioEl.current?.paused) {
-        audioPlayerRef.current.audioEl.current.play();
-      }
-
-      setCountdown(null); // Reset countdown
-    }, 10000); // 10 seconds
-
-    setPauseTimeout(timeout);
-  };
-
-  const handleAudioPlay = () => {
-    if (pauseTimeout) {
-      clearTimeout(pauseTimeout);
-      setPauseTimeout(null);
-    }
-    if (countdownInterval) {
-      clearInterval(countdownInterval);
-      setCountdownInterval(null);
-    }
-    setCountdown(null);
-  };
-
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allow only alphanumeric characters
     const regex = /^[a-zA-Z0-9]*$/;
 
     if (!regex.test(event.key)) {
-      event.preventDefault();
+      event.preventDefault(); // Prevent special characters from being typed
     }
   };
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -340,17 +382,15 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
   };
 
   useEffect(() => {
-    const audioEl = audioPlayerRef.current?.audioEl.current;
-    if (audioEl) {
-      audioEl.addEventListener("pause", handleAudioPause);
-      audioEl.addEventListener("play", handleAudioPlay);
-
-      return () => {
-        audioEl.removeEventListener("pause", handleAudioPause);
-        audioEl.removeEventListener("play", handleAudioPlay);
-      };
+    if (
+      currentLyricIndex === lyrics.length - 1 &&
+      isValidated &&
+      isMusicFinished
+    ) {
+      setIsStarted(false);
+      setIsGameOver(true);
     }
-  }, [audioPlayerRef, pauseTimeout, countdownInterval]);
+  }, [currentLyricIndex, isValidated, lyrics.length, isMusicFinished]);
 
   const calculateWPM = (): number => {
     if (!startTime || !endTime || endTime <= startTime) {
@@ -395,7 +435,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
   };
 
   const renderLyrics = () => {
-    if (currentLyricIndex === lyrics.length - 1 && isValidated && isGameOver) {
+    if (isGameOver) {
       return (
         <div className="final-score">
           <p>Score final: {score}</p>
@@ -418,7 +458,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         </div>
       );
     }
-
+  
     return lyrics.map((lyric, index) => (
       <div
         key={index}
@@ -449,7 +489,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
       </div>
     ));
   };
-
+  
   const handlePlayPauseClick = () => {
     const audioEl = audioPlayerRef.current?.audioEl.current;
     if (audioEl) {
@@ -480,16 +520,16 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
                 : "Pause"}
             </button>
           )}
-          {countdown !== null && (
-            <div >
-              <p>Skipping in: {countdown} seconds</p>
-            </div>
-          )}
           <div className="score">
             <p>
               Score : {score} ({lastScoreChange > 0 ? "+" : ""}
               {lastScoreChange})
             </p>
+            {countdown !== null && (
+              <div >
+                <p>Resuming in: {countdown} seconds</p>
+              </div>
+            )}
           </div>
         </>
       )}
