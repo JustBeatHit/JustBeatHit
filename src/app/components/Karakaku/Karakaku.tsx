@@ -7,6 +7,8 @@ import { loadLRCFile } from '@/utils/LrcLoader';
 import '@/stylesheets/karakaku.scss';
 import Link from 'next/link';
 
+import { useLyrics } from './utils/useLyrics';
+
 // Normalise les chaînes et remplace les "oe" par "œ" et supprime les accents
 const normalizeString = (str: string): string => {
     return str
@@ -26,7 +28,6 @@ interface KarakakuProps {
 }
 
 const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
-    const [lyrics, setLyrics] = useState<LyricLine[]>([]);
     const [currentLyricIndex, setCurrentLyricIndex] = useState<number>(0);
     const [userInput, setUserInput] = useState<string>('');
     const [isValidated, setIsValidated] = useState<boolean>(false);
@@ -39,7 +40,6 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
     const [lastScoreChange, setLastScoreChange] = useState<number>(0);
     const [hasErrors, setHasErrors] = useState<boolean>(false);
     const [pauseCount, setPauseCount] = useState<number>(0);
-    const [totalLines, setTotalLines] = useState<number>(0);
     const [startTime, setStartTime] = useState<number>(0);
     const [endTime, setEndTime] = useState<number>(0);
     const [incorrectCharacters, setIncorrectCharacters] = useState<number>(0);
@@ -47,24 +47,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
     const [isGameOver, setIsGameOver] = useState<boolean>(false);
     let [isMusicFinished, setIsMusicFinished] = useState<boolean>(false);
 
-    useEffect(() => {
-        const loadLyrics = async () => {
-            try {
-                const lrcContent = await loadLRCFile(`/songs/${songName}/lyrics.lrc`);
-                const parsedLyrics = parseLRC(lrcContent);
-                const cleanedLyrics = parsedLyrics.map(lyric => ({
-                    ...lyric,
-                    text: removeParentheses(lyric.text)
-                }));
-                setLyrics(cleanedLyrics);
-                setTotalLines(cleanedLyrics.length);
-            } catch (error) {
-                console.error('Failed to load LRC file:', error);
-            }
-        };
-
-        loadLyrics();
-    }, [songName]);
+    const { lyrics, totalLines } = useLyrics(songName, parseLRC);
 
     useEffect(() => {
         // Initialise les références aux caractères lorsque les paroles changent
@@ -106,7 +89,6 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         const audioEl = audioPlayerRef.current?.audioEl.current;
         if (audioEl) {
             const currentTime = audioEl.currentTime;
-            const duration = audioEl.duration;
             const nextLyricTime = lyrics[currentLyricIndex + 1]?.time;
 
             if (nextLyricTime && currentTime >= nextLyricTime - 0.05) {
