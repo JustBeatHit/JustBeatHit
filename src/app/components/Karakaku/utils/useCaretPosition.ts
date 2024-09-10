@@ -4,10 +4,11 @@ interface UseCaretPositionProps {
     userInput: string;
     currentLyricIndex: number;
     lyrics: { text: string }[];
-    charRefs: RefObject<(HTMLSpanElement | null)[][]>;
+    charRefs: RefObject<(HTMLSpanElement | null)[][] | null>;
     caretRef: RefObject<HTMLDivElement>;
 }
 
+//Positionne le caret en fonction de la position de l'utilisateur dans les paroles
 export const useCaretPosition = ({
                                      userInput,
                                      currentLyricIndex,
@@ -17,11 +18,14 @@ export const useCaretPosition = ({
                                  }: UseCaretPositionProps) => {
     useEffect(() => {
         const updateCaretPosition = () => {
+            if (!charRefs.current) return;
+
             const currentCharIndex = userInput.length;
             const charRef = charRefs.current[currentLyricIndex]?.[currentCharIndex];
             const currentLyric = lyrics[currentLyricIndex]?.text || '';
 
             if (currentCharIndex === currentLyric.length) {
+                // Positionner le caret après la dernière lettre
                 const lastCharRef = charRefs.current[currentLyricIndex]?.[currentCharIndex - 1];
                 if (lastCharRef && caretRef.current) {
                     const rect = lastCharRef.getBoundingClientRect();

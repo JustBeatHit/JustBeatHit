@@ -1,4 +1,3 @@
-// useLyrics.ts
 import { useEffect, useState } from 'react';
 import { LyricLine } from '@/utils/LrcParser';
 import { loadLRCFile } from '@/utils/LrcLoader';
@@ -7,6 +6,7 @@ const removeParentheses = (str: string): string => {
     return str.replace(/\(.*?\)/g, '').trim();
 };
 
+//Récupère les lyrics à partir du fichier LRC
 export const useLyrics = (songName: string, parseLRC: (content: string) => LyricLine[]) => {
     const [lyrics, setLyrics] = useState<LyricLine[]>([]);
     const [totalLines, setTotalLines] = useState<number>(0);
