@@ -8,6 +8,7 @@ import '@/stylesheets/karakaku.scss';
 import Link from 'next/link';
 
 import { useLyrics } from './utils/useLyrics';
+import {useCaretPosition} from "./utils/useCaretPosition";
 
 // Normalise les chaînes et remplace les "oe" par "œ" et supprime les accents
 const normalizeString = (str: string): string => {
@@ -54,37 +55,13 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         charRefs.current = lyrics.map(() => []);
     }, [lyrics]);
 
-    useEffect(() => {
-        // Mettre à jour la position du caret
-        const updateCaretPosition = () => {
-            const currentCharIndex = userInput.length;
-            const charRef = charRefs.current[currentLyricIndex]?.[currentCharIndex];
-            const currentLyric = lyrics[currentLyricIndex]?.text || '';
-
-            if (currentCharIndex === currentLyric.length) {
-                // Positionner le caret après la dernière lettre
-                const lastCharRef = charRefs.current[currentLyricIndex]?.[currentCharIndex - 1];
-                if (lastCharRef && caretRef.current) {
-                    const rect = lastCharRef.getBoundingClientRect();
-                    const parentRect = lastCharRef.parentElement?.getBoundingClientRect();
-                    if (rect && parentRect) {
-                        caretRef.current.style.left = `${rect.right - parentRect.left}px`;
-                        caretRef.current.style.top = `${rect.top - parentRect.top}px`;
-                    }
-                }
-            } else if (charRef && caretRef.current) {
-                const rect = charRef.getBoundingClientRect();
-                const parentRect = charRef.parentElement?.getBoundingClientRect();
-                if (rect && parentRect) {
-                    caretRef.current.style.left = `${rect.left - parentRect.left}px`;
-                    caretRef.current.style.top = `${rect.top - parentRect.top}px`;
-                }
-            }
-        };
-
-        updateCaretPosition();
-    }, [userInput, currentLyricIndex, lyrics]);
-
+    useCaretPosition({
+        userInput,
+        currentLyricIndex,
+        lyrics,
+        charRefs,
+        caretRef
+    });
     const handleTimeUpdate = () => {
         const audioEl = audioPlayerRef.current?.audioEl.current;
         if (audioEl) {
