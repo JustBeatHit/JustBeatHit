@@ -46,6 +46,10 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
   const [totalCharacters, setTotalCharacters] = useState<number>(0);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   let [isMusicFinished, setIsMusicFinished] = useState<boolean>(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [pauseTimeout, setPauseTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [countdownInterval, setCountdownInterval] =
+    useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const loadLyrics = async () => {
@@ -137,6 +141,59 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
       };
     }
   };
+  const handleAudioPause = () => {
+    let timeLeft = 10; // 10 seconds
+    setCountdown(timeLeft);
+
+    // Clear any existing intervals before starting a new one
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+    }
+
+    // Set interval to update countdown every second
+    const interval = setInterval(() => {
+      timeLeft -= 1;
+      setCountdown(timeLeft);
+
+      if (timeLeft <= 0) {
+        clearInterval(interval); // Clear the interval when countdown ends
+      }
+    }, 1000);
+
+    setCountdownInterval(interval);
+
+    // Set a timeout to skip to the next lyric after 10 seconds
+    const timeout = setTimeout(() => {
+      clearInterval(interval); // Clear the interval
+
+      setCurrentLyricIndex((prevIndex) => prevIndex + 1);
+      setUserInput("");
+      setIsValidated(false);
+      setHasErrors(false);
+
+      // Continue playing the audio after skipping the line
+      if (audioPlayerRef.current?.audioEl.current?.paused) {
+        audioPlayerRef.current.audioEl.current.play();
+      }
+
+      setCountdown(null); // Reset countdown
+    }, 10000); // 10 seconds
+
+    setPauseTimeout(timeout);
+  };
+
+  const handleAudioPlay = () => {
+    if (pauseTimeout) {
+      clearTimeout(pauseTimeout);
+      setPauseTimeout(null);
+    }
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+      setCountdownInterval(null);
+    }
+    setCountdown(null);
+  };
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     const regex = /^[a-zA-Z0-9]*$/;
 
@@ -283,15 +340,17 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
   };
 
   useEffect(() => {
-    if (
-      currentLyricIndex === lyrics.length - 1 &&
-      isValidated &&
-      isMusicFinished
-    ) {
-      setIsStarted(false);
-      setIsGameOver(true);
+    const audioEl = audioPlayerRef.current?.audioEl.current;
+    if (audioEl) {
+      audioEl.addEventListener("pause", handleAudioPause);
+      audioEl.addEventListener("play", handleAudioPlay);
+
+      return () => {
+        audioEl.removeEventListener("pause", handleAudioPause);
+        audioEl.removeEventListener("play", handleAudioPlay);
+      };
     }
-  }, [currentLyricIndex, isValidated, lyrics.length, isMusicFinished]);
+  }, [audioPlayerRef, pauseTimeout, countdownInterval]);
 
   const calculateWPM = (): number => {
     if (!startTime || !endTime || endTime <= startTime) {
@@ -420,6 +479,11 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
                 ? "Play"
                 : "Pause"}
             </button>
+          )}
+          {countdown !== null && (
+            <div >
+              <p>Skipping in: {countdown} seconds</p>
+            </div>
           )}
           <div className="score">
             <p>
