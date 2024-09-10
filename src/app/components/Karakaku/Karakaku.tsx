@@ -8,6 +8,7 @@ import Link from 'next/link';
 
 import { useLyrics } from './utils/useLyrics';
 import {useCaretPosition} from "./utils/useCaretPosition";
+import { calculateWPM, calculateAccuracy, calculateScore, calculatePauseCount } from './utils/scoreUtils';
 
 // Normalise les chaînes et remplace les "oe" par "œ" et supprime les accents
 const normalizeString = (str: string): string => {
@@ -71,7 +72,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
                 if (!isValidated) {
                     audioEl.pause();
                     const points = -500;
-                    handlePause();
+                    setPauseCount(prevCount => calculatePauseCount(prevCount));
                     setScore(prevScore => {
                         const newScore = Math.max(prevScore + points, 0);
                         setLastScoreChange(points);
@@ -150,11 +151,8 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
             setIsValidated(true);
             if (!hasErrors) {
                 const points = 500;
-                setScore(prevScore => {
-                    const newScore = prevScore + points;
-                    setLastScoreChange(points);
-                    return newScore;
-                });
+                setScore(prevScore => calculateScore(prevScore, points));
+                setLastScoreChange(points);
             }
 
             const alphabeticCharacters = userInputUpdated.match(/[a-zA-Z]/g);
@@ -174,10 +172,6 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
             setIsStarted(true);
             setStartTime(Date.now());
         }
-    };
-
-    const handlePause = () => {
-        setPauseCount(prevCount => prevCount + 1);
     };
 
     const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
@@ -210,25 +204,6 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         }
     }, [currentLyricIndex, isValidated, lyrics.length, isMusicFinished]);
 
-    const calculateWPM = (): number => {
-        if (!startTime || !endTime || endTime <= startTime) {
-            return 0;
-        }
-
-        const elapsedTimeInSeconds = (endTime - startTime) / 1000;
-        const words = lyrics.reduce((acc, lyric) => acc + lyric.text.split(' ').length, 0);
-        const wpm = (words / elapsedTimeInSeconds) * 60;
-        return Math.round(wpm);
-    };
-
-    const calculateAccuracy = (): number => {
-        if (!userInput || userInput.length === 0) {
-            return 0;
-        }
-        const accuracy = ((totalCharacters - incorrectCharacters) / totalCharacters) * 100;
-        return Math.round(accuracy);
-    };
-
     const handleReplay = () => {
         setCurrentLyricIndex(0);
         setUserInput('');
@@ -254,8 +229,8 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
                 <div className="final-score">
                     <p>Score final: {score}</p>
                     <p>Nombre de lignes en pause : {pauseCount} pauses / {totalLines} lignes</p>
-                    <p>Vitesse de frappe : {calculateWPM()} mots par minute</p>
-                    <p>Précision d'écriture : {calculateAccuracy()}%</p>
+                    <p>Vitesse de frappe : {calculateWPM(startTime, endTime, lyrics)} mots par minute</p>
+                    <p>Précision d'écriture : {calculateAccuracy(totalCharacters, incorrectCharacters)}%</p>
                     <div className="btn-list">
                         <button className="btn-primary" onClick={handleReplay}>Rejouer</button>
                         <Link href="/karakaku">
