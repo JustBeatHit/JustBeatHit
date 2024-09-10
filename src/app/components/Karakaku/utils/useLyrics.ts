@@ -1,13 +1,18 @@
-import { useEffect, useState } from 'react';
+import { RefObject, useEffect, useState } from 'react';
 import { LyricLine } from '@/utils/LrcParser';
 import { loadLRCFile } from '@/utils/LrcLoader';
 
+// Enlève les segments entre parenthèses dans les lignes de paroles
 const removeParentheses = (str: string): string => {
     return str.replace(/\(.*?\)/g, '').trim();
 };
 
-//Récupère les lyrics à partir du fichier LRC
-export const useLyrics = (songName: string, parseLRC: (content: string) => LyricLine[]) => {
+// Récupère les lyrics à partir du fichier LRC
+export const useLyrics = (
+    songName: string,
+    charRefs: RefObject<(HTMLSpanElement | null)[][]>,
+    parseLRC: (content: string) => LyricLine[]
+) => {
     const [lyrics, setLyrics] = useState<LyricLine[]>([]);
     const [totalLines, setTotalLines] = useState<number>(0);
 
@@ -22,13 +27,22 @@ export const useLyrics = (songName: string, parseLRC: (content: string) => Lyric
                 }));
                 setLyrics(cleanedLyrics);
                 setTotalLines(cleanedLyrics.length);
+
+                // Initialise les références aux caractères lorsque les paroles changent
+                // if (charRefs.current) {
+                //     cleanedLyrics.forEach((_, index) => {
+                //         if (!charRefs.current![index]) {
+                //             charRefs.current![index] = [];
+                //         }
+                //     });
+                // }
             } catch (error) {
                 console.error('Failed to load LRC file:', error);
             }
         };
 
         loadLyrics();
-    }, [songName, parseLRC]);
+    }, [songName, parseLRC, charRefs]);
 
     return { lyrics, totalLines };
 };

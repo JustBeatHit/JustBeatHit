@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import ReactAudioPlayer from 'react-audio-player';
-import { parseLRC, LyricLine } from '@/utils/LrcParser';
-import { loadLRCFile } from '@/utils/LrcLoader';
+import { parseLRC } from '@/utils/LrcParser';
 import '@/stylesheets/karakaku.scss';
 import Link from 'next/link';
 
@@ -48,7 +47,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
     const [isGameOver, setIsGameOver] = useState<boolean>(false);
     let [isMusicFinished, setIsMusicFinished] = useState<boolean>(false);
 
-    const { lyrics, totalLines } = useLyrics(songName, parseLRC);
+    const { lyrics, totalLines } = useLyrics(songName, charRefs, parseLRC);
 
     useEffect(() => {
         // Initialise les références aux caractères lorsque les paroles changent
