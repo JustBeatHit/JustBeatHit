@@ -8,8 +8,8 @@ import Link from 'next/link';
 
 import { useLyrics, normalizeString } from './utils/useLyrics';
 import { useCaretPosition } from "./utils/useCaretPosition";
-import { calculateWPM, calculateAccuracy, calculateScore, calculatePauseCount } from './utils/scoreUtils';
-import { handleTimeUpdate } from "./utils/timeUpdateUtils";
+import { calculateWPM, calculateAccuracy, calculatePauseCount } from './utils/scoreUtils';
+import { handlePlayPauseClick, handleTimeUpdate } from "./utils/timeUpdateUtils";
 import { handleInputChange as handleInputChangeUtil, handlePaste } from './utils/inputChangeUtils';
 
 interface KarakakuProps {
@@ -177,18 +177,6 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         ));
     };
 
-    const handlePlayPauseClick = () => {
-        const audioEl = audioPlayerRef.current?.audioEl.current;
-        if (audioEl) {
-            if (audioEl.paused) {
-                audioEl.play();
-                setIsStarted(true);
-            } else {
-                audioEl.pause();
-            }
-        }
-    };
-
     return (
         <div className="karakaku">
             {!isGameOver && (
@@ -201,7 +189,8 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
                         listenInterval={100}
                     />
                     {!isStarted && (
-                        <button onClick={handlePlayPauseClick} className="btn-primary">
+                        <button onClick={() => handlePlayPauseClick(audioPlayerRef, setIsStarted)}
+                                className="btn-primary">
                             {audioPlayerRef.current?.audioEl.current?.paused ? 'Play' : 'Pause'}
                         </button>
                     )}

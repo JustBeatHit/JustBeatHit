@@ -1,4 +1,21 @@
 import ReactAudioPlayer from "react-audio-player";
+import React from "react";
+
+
+export const handlePlayPauseClick = (
+    audioPlayerRef: React.RefObject<any>,
+    setIsStarted: (started: boolean) => void
+) => {
+    const audioEl = audioPlayerRef.current?.audioEl.current;
+    if (audioEl) {
+        if (audioEl.paused) {
+            audioEl.play();
+            setIsStarted(true);
+        } else {
+            audioEl.pause();
+        }
+    }
+};
 
 export const handleTimeUpdate = (
     audioPlayerRef: React.RefObject<ReactAudioPlayer>,
