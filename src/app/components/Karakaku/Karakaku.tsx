@@ -6,19 +6,10 @@ import { parseLRC } from '@/utils/LrcParser';
 import '@/stylesheets/karakaku.scss';
 import Link from 'next/link';
 
-import { useLyrics } from './utils/useLyrics';
-import {useCaretPosition} from "./utils/useCaretPosition";
+import { useLyrics, normalizeString } from './utils/useLyrics';
+import { useCaretPosition } from "./utils/useCaretPosition";
 import { calculateWPM, calculateAccuracy, calculateScore, calculatePauseCount } from './utils/scoreUtils';
-import {handleTimeUpdate} from "./utils/timeUpdateUtils";
-
-// Normalise les chaînes et remplace les "oe" par "œ" et supprime les accents
-const normalizeString = (str: string): string => {
-    return str
-        .replace(/oe/g, 'œ')
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase();
-};
+import { handleTimeUpdate } from "./utils/timeUpdateUtils";
 
 // Enlève les segments entre parenthèses dans les lignes de paroles
 const removeParentheses = (str: string): string => {
@@ -90,7 +81,9 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         const autoCompleteChars = [' ', '.', ',', '!', '?', ';', ':', '-', '(', ')', '"', "'"];
 
         // Remplacer 'oe' par 'œ'
-        inputValue = inputValue.replace(/oe/g, 'œ');
+        if (currentLyric[inputValue.length - 2] == 'œ' && inputValue.endsWith('oe')) {
+            inputValue = inputValue.slice(0, -2) + 'œ';
+        }
 
         let userInputUpdated = inputValue;
 

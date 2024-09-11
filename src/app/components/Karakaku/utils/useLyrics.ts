@@ -7,6 +7,15 @@ const removeParentheses = (str: string): string => {
     return str.replace(/\(.*?\)/g, '').trim();
 };
 
+// Normalise les chaînes et remplace les "oe" par "œ" et supprime les accents
+export const normalizeString = (str: string): string => {
+    return str
+        .replace(/oe/g, 'œ')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
+};
+
 // Récupère les lyrics à partir du fichier LRC
 export const useLyrics = (
     songName: string,
