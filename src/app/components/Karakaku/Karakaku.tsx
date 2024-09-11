@@ -36,12 +36,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
     const [isGameOver, setIsGameOver] = useState<boolean>(false);
     const { lyrics, totalLines } = useLyrics(songName, charRefs, parseLRC);
     const [isMusicFinished, setIsMusicFinished] = useState<boolean>(false);
-
-    useEffect(() => {
-        // Initialise les références aux caractères lorsque les paroles changent
-        charRefs.current = lyrics.map(() => []);
-    }, [lyrics]);
-
+    
     useCaretPosition({
         userInput,
         currentLyricIndex,
