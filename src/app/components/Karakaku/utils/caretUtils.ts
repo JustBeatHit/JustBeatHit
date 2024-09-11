@@ -9,7 +9,7 @@ interface UseCaretPositionProps {
 }
 
 //Positionne le caret en fonction de la position de l'utilisateur dans les paroles
-export const useCaretPosition = ({
+export const caretUtils = ({
                                      userInput,
                                      currentLyricIndex,
                                      lyrics,

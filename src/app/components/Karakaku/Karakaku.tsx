@@ -6,11 +6,11 @@ import { parseLRC } from '@/utils/LrcParser';
 import '@/stylesheets/karakaku.scss';
 import Link from 'next/link';
 
-import { useLyrics, normalizeString } from './utils/useLyrics';
-import { useCaretPosition } from "./utils/useCaretPosition";
+import { lyricsDisplayUtils, normalizeString } from './utils/lyricsDisplayUtils';
+import { caretUtils } from "./utils/caretUtils";
 import { calculateWPM, calculateAccuracy, calculatePauseCount } from './utils/scoreUtils';
-import { handlePlayPauseClick, handleTimeUpdate } from "./utils/timeUpdateUtils";
-import { handleInputChange as handleInputChangeUtil, handlePaste } from './utils/inputChangeUtils';
+import { handlePlayPauseClick, handleTimeUpdate } from "./utils/timeManagerUtils";
+import { handleInputChange as handleInputChangeUtil, handlePaste } from './utils/inputManagerUtils';
 
 interface KarakakuProps {
     songName: string;
@@ -34,10 +34,10 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
     const [incorrectCharacters, setIncorrectCharacters] = useState<number>(0);
     const [totalCharacters, setTotalCharacters] = useState<number>(0);
     const [isGameOver, setIsGameOver] = useState<boolean>(false);
-    const { lyrics, totalLines } = useLyrics(songName, charRefs, parseLRC);
+    const { lyrics, totalLines } = lyricsDisplayUtils(songName, charRefs, parseLRC);
     const [isMusicFinished, setIsMusicFinished] = useState<boolean>(false);
-    
-    useCaretPosition({
+
+    caretUtils({
         userInput,
         currentLyricIndex,
         lyrics,

@@ -1,4 +1,4 @@
-import { normalizeString } from './useLyrics';
+import { normalizeString } from './lyricsDisplayUtils';
 import { calculateScore } from './scoreUtils';
 import React from "react";
 

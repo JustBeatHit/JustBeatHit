@@ -17,7 +17,7 @@ export const normalizeString = (str: string): string => {
 };
 
 // Récupère les lyrics à partir du fichier LRC
-export const useLyrics = (
+export const lyricsDisplayUtils = (
     songName: string,
     charRefs: RefObject<(HTMLSpanElement | null)[][]>,
     parseLRC: (content: string) => LyricLine[]
