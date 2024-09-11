@@ -13,12 +13,13 @@ export const auth = defineAuth({
   userAttributes: {
     preferredUsername: {
       mutable: true,
-      required: true
-    }
-  },
-  multifactor: {
-    mode: "OPTIONAL",
-    totp: true
+    },
+    nickname: {
+      mutable: true
+    },
+    profilePicture: {
+      mutable: true
+    },
   },
   groups: ["Admins"],
   access: (allow) => [

@@ -4,18 +4,20 @@ import { AuthGetCurrentUserServer } from "@/utils/amplify-utils";
 export async function middleware(request: NextRequest) {
     const response = NextResponse.next();
     const user = await AuthGetCurrentUserServer()
-    
+
+    console.info(user)
+
     const isOnGame = request.nextUrl.pathname.startsWith("/karakaku")
 
-    // if (isOnGame) {
-    //     if(!user){
-    //         return NextResponse.redirect(new URL("/auth/login", request.nextUrl));
-    //     }
-    //     return response;
-    // }
-    // else if(user){
-    //     return NextResponse.redirect(new URL("/karakaku", request.nextUrl))
-    // }
+    if (isOnGame) {
+        if (!user) {
+            return NextResponse.redirect(new URL("/auth/login", request.nextUrl));
+        }
+        return response;
+    }
+    else if (user) {
+        return NextResponse.redirect(new URL("/karakaku", request.nextUrl))
+    }
 }
 
 export const config = {
@@ -28,6 +30,6 @@ export const config = {
          * - favicon.ico (favicon file)
          * - login
          */
-        "/((?!api|_next/static|_next/image|favicon.ico).*)",
+        "/((?!api|_next/static|_next/image|favicon.ico|songs).*)",
     ],
 };
