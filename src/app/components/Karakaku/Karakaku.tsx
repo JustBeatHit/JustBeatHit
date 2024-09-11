@@ -10,7 +10,7 @@ import { useLyrics, normalizeString } from './utils/useLyrics';
 import { useCaretPosition } from "./utils/useCaretPosition";
 import { calculateWPM, calculateAccuracy, calculateScore, calculatePauseCount } from './utils/scoreUtils';
 import { handleTimeUpdate } from "./utils/timeUpdateUtils";
-import { handleInputChange as handleInputChangeUtil } from './utils/inputChangeUtils';
+import { handleInputChange as handleInputChangeUtil, handlePaste } from './utils/inputChangeUtils';
 
 interface KarakakuProps {
     songName: string;
@@ -89,10 +89,6 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
             isStarted,
             hasErrors
         );
-    };
-
-    const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-        e.preventDefault();
     };
 
     const getStyledText = () => {

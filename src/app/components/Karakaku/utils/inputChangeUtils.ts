@@ -1,5 +1,10 @@
 import { normalizeString } from './useLyrics';
 import { calculateScore } from './scoreUtils';
+import React from "react";
+
+export const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+};
 
 export const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
