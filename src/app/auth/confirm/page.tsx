@@ -11,16 +11,19 @@ export default function Page() {
 
   return (
     <div>
-      <h3>Confirmation</h3>
+      <div className='form-header'>
+        <h3>Confirmation</h3>
+        <p className="description">A confirmation code has been sent by e-mail</p>
+      </div>
       <form className="" action={dispatch} >
         <input className=" hidden" type="text" id="email" name="email" readOnly value={String(searchParams.get("email"))} />
         <label htmlFor="code">Confirmation code :</label>
         {/* <p>The verification code has been sent to you by email.</p> */}
         <input className=" text-black" type="number" name="code" id="code" />
-        <ConfirmButton/>
+        <ConfirmButton />
       </form>
       <form action={sendDispatch}>
-        <input className=" hidden" type="text" id="email" name="email" readOnly value={String(searchParams.get("email"))} /> 
+        <input className=" hidden" type="text" id="email" name="email" readOnly value={String(searchParams.get("email"))} />
         <button className="secondary">
           Re-send code
         </button>

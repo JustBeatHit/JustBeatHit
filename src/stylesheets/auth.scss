@@ -6,6 +6,7 @@
     align-items: center;
     width: 100vw;
     height: 100vh;
+    margin: 0 auto;
     font-size: 1rem;
     color: #fffef8;
     font-weight: 400;
@@ -22,42 +23,51 @@ form {
     font-weight: 400;
     margin-bottom: 24px;
     width: auto;
+    font-family: var(--font-inter);
 }
 
 input {
-    padding: 8px;
+    padding: 12px;
     border-radius: 8px;
     border: 2px solid #2d2d2d;
     margin-bottom: 4px;
     background-color: transparent;
-    font-family: 'Goia';
+    font-family: var(--font-inter);
+    font-weight: 600;
+    font-size: 14px;
     transition: box-shadow .5s;
+    color: white;
 }
 
 input:focus-visible {
     // outline: 2px solid sandybrown;
     outline: none;
-    box-shadow: 0 0 10px rgba(153, 96, 244, 0.2);
+    box-shadow: 0 0 6px rgba(244, 163, 96, 0.2);
 }
 
 label {
     margin-bottom: 8px;
     margin-top: 12px;
     color: #fffef8;
+    font-weight: 700;
 }
 
 button {
-    font-family: 'Goia';
+    font-family: var(--font-goia);
     border: none;
     border-radius: 8px;
-    margin-top: 16px;
-    padding: 8px;
+    margin-top: 12px;
+    padding: 12px;
     background-color: sandybrown;
     color: #fffef8;
     text-transform: uppercase;
     letter-spacing: 0.5;
     transition: background-color, color 0.3s;
     font-weight: 400;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
     cursor: pointer;
 }
 
@@ -78,15 +88,37 @@ button:hover {
     color: sandybrown;
 }
 
-h3{
-    color: sandybrown;
-    font-size: 2rem;
-    font-weight: 400;
+.form-header {
+    margin-bottom: 44px;
+    font-family: var(--font-inter);
+
+    h3{
+        color: sandybrown;
+        font-size: 2.64rem;
+        font-weight: 400;
+        font-family: var(--font-goia);
+        margin: 0 0;
+    }
+
+    .description {
+        margin: 4px;
+        color: hsl(240 3.8% 46.1%);
+    }
+}
+
+.form-error {
+    color: #F42D30;
+    font-size: 14px;
+}
+
+#form-error {
+    margin-top: 8px;
 }
 
 .link{
+    font-family: var(--font-inter);
+    font-weight: 600;
     color: sandybrown;
-    font-weight: 400;
     width: 100%;
     transition: color 0.3s;
 }
@@ -95,6 +127,7 @@ h3{
     color: #fffef8;
 }
 
+
 .form-container{
-    max-width: 230px;
+    max-width: 360px;
 }
