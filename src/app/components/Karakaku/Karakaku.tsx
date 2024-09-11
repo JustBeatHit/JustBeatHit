@@ -37,6 +37,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
     const { lyrics, totalLines } = lyricsDisplayUtils(songName, charRefs, parseLRC);
     const [isMusicFinished, setIsMusicFinished] = useState<boolean>(false);
 
+    //Appel de fonction pour placer le caret
     caretUtils({
         userInput,
         currentLyricIndex,
@@ -44,6 +45,8 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         charRefs,
         caretRef
     });
+
+    //Appel de fonction pour gérer les actions liées au temps/durée de la chanson
     const handleTimeUpdateWrapper = () => {
         handleTimeUpdate(
             audioPlayerRef,
@@ -62,6 +65,8 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
             setIsMusicFinished
         );
     };
+
+    //Appel de fonction pour gérer les actions liées à la saisie de texte sur l'input
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleInputChangeUtil(
             e,
@@ -86,6 +91,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         );
     };
 
+    //Fonction qui permet de styliser les caractères en fonction s'ils sont corrects ou non
     const getStyledText = () => {
         const currentLyric = lyrics[currentLyricIndex]?.text || '';
         return currentLyric.split('').map((char, index) => {
@@ -105,6 +111,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         });
     };
 
+    //Termine la partie si l'utilisateur a terminé de saisir les paroles et que la chanson est terminée
     useEffect(() => {
         if (currentLyricIndex === lyrics.length - 1 && (isValidated && isMusicFinished)) {
             setIsStarted(false);
@@ -112,6 +119,8 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         }
     }, [currentLyricIndex, isValidated, lyrics.length, isMusicFinished]);
 
+
+    //Relance la partie
     const handleReplay = () => {
         setCurrentLyricIndex(0);
         setUserInput('');
@@ -131,6 +140,7 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         audioPlayerRef.current?.audioEl.current?.load();
     };
 
+    //Affiche les paroles et le score final
     const renderLyrics = () => {
         if ((currentLyricIndex === lyrics.length - 1 && isValidated) && isGameOver) {
             return (

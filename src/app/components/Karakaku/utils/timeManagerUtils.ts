@@ -2,6 +2,7 @@ import ReactAudioPlayer from "react-audio-player";
 import React from "react";
 
 
+//Joue ou stop l'audio
 export const handlePlayPauseClick = (
     audioPlayerRef: React.RefObject<any>,
     setIsStarted: (started: boolean) => void
@@ -17,6 +18,7 @@ export const handlePlayPauseClick = (
     }
 };
 
+//Actions liées à la durée de la chanson
 export const handleTimeUpdate = (
     audioPlayerRef: React.RefObject<ReactAudioPlayer>,
     lyrics: any[],

@@ -2,10 +2,12 @@ import { normalizeString } from './lyricsDisplayUtils';
 import { calculateScore } from './scoreUtils';
 import React from "react";
 
+//Bloque le copié collé
 export const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
 };
 
+//Actions liées à la saisie utilisateur
 export const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     lyrics: { text: string }[],

@@ -2,6 +2,7 @@ interface Lyric {
     text: string;
 }
 
+//Calcule les mots par minute
 export const calculateWPM = (startTime: number, endTime: number, lyrics: Lyric[]): number => {
     if (!startTime || !endTime || endTime <= startTime) {
         return 0;
@@ -13,6 +14,7 @@ export const calculateWPM = (startTime: number, endTime: number, lyrics: Lyric[]
     return Math.round(wpm);
 };
 
+//Calcule la précision d'écriture
 export const calculateAccuracy = (totalCharacters: number, incorrectCharacters: number): number => {
     if (!totalCharacters || totalCharacters === 0) {
         return 0;
@@ -21,10 +23,12 @@ export const calculateAccuracy = (totalCharacters: number, incorrectCharacters: 
     return Math.round(accuracy);
 };
 
+//Calcule le score
 export const calculateScore = (prevScore: number, points: number): number => {
     return Math.max(prevScore + points, 0);
 };
 
+//Calcule le nombre de pauses
 export const calculatePauseCount = (pauseCount: number): number => {
     return pauseCount + 1;
 };
