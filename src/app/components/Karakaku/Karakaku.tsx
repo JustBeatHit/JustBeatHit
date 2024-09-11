@@ -10,11 +10,7 @@ import { useLyrics, normalizeString } from './utils/useLyrics';
 import { useCaretPosition } from "./utils/useCaretPosition";
 import { calculateWPM, calculateAccuracy, calculateScore, calculatePauseCount } from './utils/scoreUtils';
 import { handleTimeUpdate } from "./utils/timeUpdateUtils";
-
-// Enlève les segments entre parenthèses dans les lignes de paroles
-const removeParentheses = (str: string): string => {
-    return str.replace(/\(.*?\)/g, '').trim();
-};
+import { handleInputChange as handleInputChangeUtil } from './utils/inputChangeUtils';
 
 interface KarakakuProps {
     songName: string;
@@ -38,9 +34,8 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
     const [incorrectCharacters, setIncorrectCharacters] = useState<number>(0);
     const [totalCharacters, setTotalCharacters] = useState<number>(0);
     const [isGameOver, setIsGameOver] = useState<boolean>(false);
-    let [isMusicFinished, setIsMusicFinished] = useState<boolean>(false);
-
     const { lyrics, totalLines } = useLyrics(songName, charRefs, parseLRC);
+    const [isMusicFinished, setIsMusicFinished] = useState<boolean>(false);
 
     useEffect(() => {
         // Initialise les références aux caractères lorsque les paroles changent
@@ -73,83 +68,27 @@ const Karakaku: React.FC<KarakakuProps> = ({ songName }) => {
         );
     };
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let inputValue = e.target.value;
-
-        if (!lyrics[currentLyricIndex]) return;
-
-        const currentLyric = lyrics[currentLyricIndex].text;
-        const autoCompleteChars = [' ', '.', ',', '!', '?', ';', ':', '-', '(', ')', '"', "'"];
-
-        // Remplacer 'oe' par 'œ'
-        if (currentLyric[inputValue.length - 2] == 'œ' && inputValue.endsWith('oe')) {
-            inputValue = inputValue.slice(0, -2) + 'œ';
-        }
-
-        let userInputUpdated = inputValue;
-
-        if (inputValue.length < userInput.length) {
-            if (inputValue.length < lockedChars.length) {
-                setUserInput(lockedChars);
-                return;
-            } else {
-                setUserInput(inputValue);
-                return;
-            }
-        }
-
-        while (autoCompleteChars.includes(currentLyric[userInputUpdated.length])) {
-            userInputUpdated += currentLyric[userInputUpdated.length];
-        }
-
-        const correctPortion = currentLyric.slice(0, userInputUpdated.length);
-        const userTypedPortion = userInputUpdated.slice(0, correctPortion.length);
-
-        if (normalizeString(userTypedPortion) === normalizeString(correctPortion)) {
-            setLockedChars(userInputUpdated);
-            const points = 100;
-            setScore(prevScore => {
-                const newScore = prevScore + points;
-                setLastScoreChange(points);
-                return newScore;
-            });
-        } else {
-            const points = -300;
-            setScore(prevScore => {
-                const newScore = Math.max(prevScore + points, 0);
-                setLastScoreChange(points);
-                return newScore;
-            });
-            setIncorrectCharacters(incorrectCharacters => incorrectCharacters + 1);
-            setHasErrors(true);
-        }
-
-        setUserInput(userInputUpdated);
-
-        if (normalizeString(userInputUpdated.trim()) === normalizeString(currentLyric.trim())) {
-            setIsValidated(true);
-            if (!hasErrors) {
-                const points = 500;
-                setScore(prevScore => calculateScore(prevScore, points));
-                setLastScoreChange(points);
-            }
-
-            const alphabeticCharacters = userInputUpdated.match(/[a-zA-Z]/g);
-            if (alphabeticCharacters) {
-                setTotalCharacters(totalCharacters => totalCharacters + alphabeticCharacters.length);
-            }
-
-            if (currentLyricIndex === lyrics.length - 1) {
-                setEndTime(Date.now());
-            } else if (audioPlayerRef.current?.audioEl.current && audioPlayerRef.current.audioEl.current.paused) {
-                audioPlayerRef.current.audioEl.current.play();
-            }
-        }
-
-        if (!isStarted && audioPlayerRef.current?.audioEl.current?.paused) {
-            audioPlayerRef.current.audioEl.current.play();
-            setIsStarted(true);
-            setStartTime(Date.now());
-        }
+        handleInputChangeUtil(
+            e,
+            lyrics,
+            currentLyricIndex,
+            userInput,
+            lockedChars,
+            setUserInput,
+            setLockedChars,
+            setScore,
+            setLastScoreChange,
+            setIncorrectCharacters,
+            setHasErrors,
+            setIsValidated,
+            setTotalCharacters,
+            audioPlayerRef,
+            setIsStarted,
+            setStartTime,
+            setEndTime,
+            isStarted,
+            hasErrors
+        );
     };
 
     const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
