@@ -35,3 +35,12 @@ AWS Secret Access Key [****************hG7b]:
 Default region name [eu-west-3]:
 Default output format [json]:
 ```
+
+### 4. Run the server at least once : 
+```bash
+npm run server
+```
+- To run the project after : 
+```bash
+npm run dev
+```
