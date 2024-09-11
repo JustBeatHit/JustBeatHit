@@ -30,7 +30,7 @@ export default function Page() {
         <span id="form-error" className="form-error" aria-live="polite" aria-atomic="true">{state.message}</span>
         <LoginButton />
       </form>
-      <Link href="/auth/register" className="link">Don't have an account yet? Sign up here.</Link>
+      <Link href="/auth/register" className="link">Don&nbsp;t have an account yet? Sign up here.</Link>
     </div>
   )
 }
