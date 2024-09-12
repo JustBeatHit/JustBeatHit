@@ -34,7 +34,30 @@ export const handleInputChange = (
     if (!lyrics[currentLyricIndex]) return;
 
     const currentLyric = lyrics[currentLyricIndex].text;
-    const autoCompleteChars = [' ', '.', ',', '!', '?', ';', ':', '-', '(', ')', '"', "'"];
+    const specialChars = [' ', '.', ',', '!', '?', ';', ':', '-', '(', ')', '"', "'", "+", "*", "/", '='];
+
+    console.log('inputValue ', inputValue[inputValue.length - 2]);
+
+    console.log(lockedChars);
+    // Blocage des caractères spéciaux dans l'input
+    const lastCharTyped = inputValue[inputValue.length - 1];
+    if (specialChars.includes(lastCharTyped)) {
+        // Empêcher l'ajout de caractères spéciaux
+        inputValue = inputValue.slice(0, -1);
+    }
+
+    // Cas où l'utilisateur tente d'effacer un caractère validé
+    if (inputValue.length < lockedChars.length) {
+        // Empêcher l'effacement des caractères validés
+        setUserInput(lockedChars);
+        return;
+    }
+
+    // Permettre l'effacement uniquement des erreurs (caractères non validés)
+    if (inputValue.length < userInput.length && inputValue.length >= lockedChars.length) {
+        setUserInput(inputValue);  // Mettre à jour avec les erreurs corrigées
+        return;
+    }
 
     // Remplacer 'oe' par 'œ'
     if (currentLyric[inputValue.length - 2] === 'œ' && inputValue.endsWith('oe')) {
@@ -43,6 +66,7 @@ export const handleInputChange = (
 
     let userInputUpdated = inputValue;
 
+    // Bloque les caractères corrects
     if (inputValue.length < userInput.length) {
         if (inputValue.length < lockedChars.length) {
             setUserInput(lockedChars);
@@ -53,7 +77,7 @@ export const handleInputChange = (
         }
     }
 
-    while (autoCompleteChars.includes(currentLyric[userInputUpdated.length])) {
+    while (specialChars.includes(currentLyric[userInputUpdated.length])) {
         userInputUpdated += currentLyric[userInputUpdated.length];
     }
 
