@@ -83,6 +83,12 @@ export const handleInputChange = (
         userInputUpdated += currentLyric[userInputUpdated.length];
     }
 
+    // Empêcher de taper plus que la longueur de la lyric
+    if (userInputUpdated.length > currentLyric.length) {
+        userInputUpdated = userInputUpdated.slice(0, currentLyric.length);
+        usedSpecialChar = true;
+    }
+
     const correctPortion = currentLyric.slice(0, userInputUpdated.length);
     const userTypedPortion = userInputUpdated.slice(0, correctPortion.length);
 
