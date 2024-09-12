@@ -103,7 +103,7 @@ export const handleInputChange = (
             });
         }
     } else {
-        const points = -300;
+        const points = -200;
         if (!usedSpecialChar) {
             setScore(prevScore => {
                 const newScore = Math.max(prevScore + points, 0);
