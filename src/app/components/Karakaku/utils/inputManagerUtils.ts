@@ -35,15 +35,17 @@ export const handleInputChange = (
 
     const currentLyric = lyrics[currentLyricIndex].text;
     const specialChars = [' ', '.', ',', '!', '?', ';', ':', '-', '(', ')', '"', "'", "+", "*", "/", '='];
+    //Booléen pour empêcher le changement de score si un caractère spécial est utilisé
+    let usedSpecialChar = false;
 
-    console.log('inputValue ', inputValue[inputValue.length - 2]);
-
-    console.log(lockedChars);
     // Blocage des caractères spéciaux dans l'input
     const lastCharTyped = inputValue[inputValue.length - 1];
     if (specialChars.includes(lastCharTyped)) {
         // Empêcher l'ajout de caractères spéciaux
         inputValue = inputValue.slice(0, -1);
+        usedSpecialChar = true;
+    } else {
+        usedSpecialChar = false;
     }
 
     // Cas où l'utilisateur tente d'effacer un caractère validé
@@ -87,18 +89,22 @@ export const handleInputChange = (
     if (normalizeString(userTypedPortion) === normalizeString(correctPortion)) {
         setLockedChars(userInputUpdated);
         const points = 100;
-        setScore(prevScore => {
-            const newScore = prevScore + points;
-            setLastScoreChange(points);
-            return newScore;
-        });
+        if (!usedSpecialChar) {
+            setScore(prevScore => {
+                const newScore = prevScore + points;
+                setLastScoreChange(points);
+                return newScore;
+            });
+        }
     } else {
         const points = -300;
-        setScore(prevScore => {
-            const newScore = Math.max(prevScore + points, 0);
-            setLastScoreChange(points);
-            return newScore;
-        });
+        if (!usedSpecialChar) {
+            setScore(prevScore => {
+                const newScore = Math.max(prevScore + points, 0);
+                setLastScoreChange(points);
+                return newScore;
+            });
+        }
         setIncorrectCharacters(prev => prev + 1);
         setHasErrors(true);
     }
